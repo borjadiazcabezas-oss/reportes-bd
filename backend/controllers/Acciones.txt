@@ -1,0 +1,135 @@
+¿Qué tengo en esta carpeta?
+JavaScript
+
+// backend/controllers/auth.controller.js
+
+import { validarCredenciales } from "../services/empleados.service.js";
+
+/**
+ * Maneja la petición de login.
+ */
+export async function login(req, res) {
+  try {
+    const { username, password } = req.body;
+
+    const resultado = await validarCredenciales(username, password);
+
+    if (resultado.valid) {
+      // Éxito: Enviar token o datos de sesión
+      res.json({ 
+        ok: true, 
+        message: "Login exitoso.",
+        data: resultado.user // Contiene userId, rol, nombre, etc.
+      });
+    } else {
+      // Fallo de autenticación
+      res.status(401).json({ 
+        ok: false, 
+        error: resultado.message 
+      });
+    }
+  } catch(err) {
+    console.error("Error en login:", err);
+    res.status(500).json({ ok: false, error: "Error interno del servidor." });
+  }
+}
+3.2. modelos.controller.js (Catálogo de Modelos)
+JavaScript
+
+// backend/controllers/modelos.controller.js
+
+import Modelo from "../models/Modelo.js";
+
+/**
+ * Obtiene todos los modelos activos para rellenar selectores.
+ */
+export async function getModelosActivos(req, res) {
+  try {
+    const modelos = await Modelo.find({ deprecated: { $ne: true } })
+                                .select('_id name type');
+
+    res.json({ ok: true, modelos });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: "Error al obtener la lista de modelos." });
+  }
+}
+3.3. incidencias.controller.js
+JavaScript
+
+// backend/controllers/incidencias.controller.js
+
+import { crearNuevaIncidencia } from "../services/incidencias.service.js";
+
+export async function registrarIncidencia(req, res) {
+  try {
+    const data = req.body; 
+    const doc = await crearNuevaIncidencia(data);
+
+    res.json({ ok: true, message: "Incidencia registrada con éxito.", incidencia: doc });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+}
+3.4. mermas.controller.js
+JavaScript
+
+// backend/controllers/mermas.controller.js
+
+import { registrarNuevaMerma } from "../services/mermas.service.js";
+
+export async function registrarMerma(req, res) {
+  try {
+    const data = req.body;
+    const doc = await registrarNuevaMerma(data);
+
+    res.json({ ok: true, message: "Merma registrada con éxito.", merma: doc });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+}
+3.5. recuperaciones.controller.js
+JavaScript
+
+// backend/controllers/recuperaciones.controller.js
+
+import { registrarNuevaRecuperacion } from "../services/recuperaciones.service.js";
+
+export async function registrarRecuperacion(req, res) {
+  try {
+    // Asumimos que el userId del actor viene en el body
+    const { actorId, ...data } = req.body; 
+    
+    // Aquí usamos actorId para la auditoría, y el resto del body para la creación
+    const doc = await registrarNuevaRecuperacion(data, actorId); 
+
+    res.json({ ok: true, message: "Recuperación registrada con éxito.", recuperacion: doc });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+}
+3.6. resumen.controller.js (Ejecución de Resumen)
+JavaScript
+
+// backend/controllers/resumen.controller.js
+
+import { generarResumenTurno } from "../services/resumen.services.js"; // Nota: tu archivo se llama resumen.services.js
+
+/**
+ * Genera el documento de ResumenTurno bajo demanda.
+ */
+export async function generarResumen(req, res) {
+  try {
+    // Parámetros: fecha (ej: '2025-11-21') y turno (1, 2, 3)
+    const { date, turno } = req.body; 
+
+    if (!date || !turno) {
+      return res.status(400).json({ ok: false, error: "Faltan date y turno." });
+    }
+
+    const resumen = await generarResumenTurno(date, parseInt(turno));
+
+    res.json({ ok: true, message: "Resumen generado.", resumen });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+}

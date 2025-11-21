@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard de Turnos</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav>
+    <img src="https://www.maderasaguilar.com/wp-content/uploads/2023/09/cropped-Favicon.png" alt="Logo">
+    <a href="#">Dashboard</a>
+    <a href="#">Historial</a>
+    <a href="#" onclick="fetch('/api/sync')">Sync Atlas → Local</a>
+  </nav>
+  <main>
+    <h1>Dashboard de Turnos</h1>
+    <div id="turnos" class="turno-container"></div>
+  </main>
+  <script src="js/main.js"></script>
+</body>
+</html>

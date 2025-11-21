@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Registro de Turno - Reporte</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <style>
+    body { font-family: Inter, Arial, sans-serif; background:#f3f4f6 }
+    .action-button{ transition:.12s }
+  </style>
+</head>
+<body class="p-4">
+  <div class="max-w-4xl mx-auto bg-white p-4 rounded-xl shadow">
+    <header class="mb-4">
+      <h1 class="text-2xl font-bold">Registro de Turno</h1>
+      <div class="mt-2 text-sm text-gray-600">Usuario: <span id="operator-name"></span></div>
+      <div class="mt-1 text-xs text-gray-500">Estado: <span id="user-id">Inicializando...</span></div>
+    </header>
+
+    <section class="mb-4 bg-green-50 p-4 rounded">
+      <h2 class="font-semibold">Actividad actual</h2>
+      <p id="current-activity-name" class="font-bold">Ninguna actividad en curso</p>
+      <div id="timer-box" class="text-3xl font-bold mt-2">00:00:00</div>
+      <button id="stop-button" class="mt-3 px-4 py-2 bg-red-600 text-white rounded hidden" onclick="promptForComment('stop')">FINALIZAR Y REGISTRAR</button>
+    </section>
+
+    <section class="mb-4">
+      <h2 class="font-semibold">Iniciar actividad</h2>
+      <div id="activity-buttons" class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3"></div>
+    </section>
+
+    <section>
+      <div class="flex justify-between items-center mb-2">
+        <h2 class="font-semibold">Historial</h2>
+        <div>
+          <button id="report-button" class="px-3 py-1 bg-blue-600 text-white rounded" onclick="generateReportAndSend()">📤 Mandar Reporte</button>
+          <button id="delete-button" class="px-3 py-1 ml-2 bg-gray-200 rounded" onclick="clearAllData()">🗑️ Borrar todo</button>
+        </div>
+      </div>
+      <div id="history-list" class="space-y-2"></div>
+      <p id="empty-history-message" class="text-gray-500">No hay registros guardados.</p>
+    </section>
+  </div>
+
+  <!-- Modal Comentario -->
+  <div id="comment-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white p-4 rounded max-w-md w-11/12">
+      <h3 id="comment-modal-title" class="font-bold mb-2">Comentario</h3>
+      <textarea id="comment-input" rows="4" class="w-full border p-2 rounded" placeholder="Comentario..."></textarea>
+      <div class="mt-3 flex justify-end space-x-2">
+        <button onclick="closeCommentModal(true)" class="px-3 py-1 bg-gray-200 rounded">Omitir</button>
+        <button onclick="closeCommentModal(false)" class="px-3 py-1 bg-green-600 text-white rounded">Guardar</button>
+      </div>
+      <input type="hidden" id="modal-action-type">
+      <input type="hidden" id="modal-activity-type">
+    </div>
+  </div>
+
+<script>
+  const OPERATOR_NAME = "Francisco Javier Herrera";
+  const OPERATOR_CODE = "251";
+  const REPORT_FUNCTION_URL = "/api/sendReport";
+  const REPORT_RECIPIENT = "borjadiazcabezas@gmail.com";
+
+  document.getElementById('operator-name').textContent = `${OPERATOR_NAME} (${OPERATOR_CODE})`;
+
+  const activityTypes = [
+    { type: 'Produccion', color: 'bg-green-600' },
+    { type: 'Limpieza', color: 'bg-yellow-600' },
+    { type: 'Averia', color: 'bg-red-600' },
+    { type: 'Mantenimiento', color: 'bg-blue-600' },
+    { type: 'Arreglo Palets', color: 'bg-purple-600' },
+    { type: 'Cambio', color: 'bg-orange-600' },
+    { type: 'OTROS', color: 'bg-gray-600' }
+  ];
+
+  const pad = n => String(n).padStart(2,'0');
+  const formatDuration = ms => {
+    if (!ms || ms < 0) return '00:00:00';
+    const s = Math.floor(ms/1000);
+    const h = Math.floor(s/3600);
+    const m = Math.floor((s%3600)/60);
+    const sec = s%60;
+    return `${pad(h)}:${pad(m)}:${pad(sec)}`;
+  };
+
+  let userId = "user_251";
+  let currentActivity = null;
+  let timerInterval = null;
+  let activitiesHistory = [];
+
+  const updateTimerDisplay = () => {
+    if(currentActivity && currentActivity.startTime) {
+      const startMs = currentActivity.startTime;
+      document.getElementById('timer-box').textContent = formatDuration(Date.now() - startMs);
+    } else {
+      document.getElementById('timer-box').textContent = '00:00:00';
+    }
+  };
+
+  const renderActivityButtons = () => {
+    const container = document.getElementById('activity-buttons');
+    container.innerHTML = '';
+    activityTypes.forEach(a => {
+      const btn = document.createElement('button');
+      btn.className = `action-button p-3 rounded text-white font-bold ${a.color}`;
+      btn.textContent = a.type;
+      btn.onclick = () => {
+        if(currentActivity) {
+          if(currentActivity.name === a.type) return promptForComment('stop');
+          stopActivity().then(()=>promptForComment('start', a.type));
+        } else {
+          promptForComment('start', a.type);
+        }
+      };
+      container.appendChild(btn);
+    });
+  };
+
+  const updateUIState = () => {
+    const nameEl = document.getElementById('current-activity-name');
+    const stopBtn = document.getElementById('stop-button');
+    if(currentActivity) {
+      nameEl.textContent = currentActivity.name;
+      stopBtn.classList.remove('hidden');
+      if(timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(updateTimerDisplay, 1000);
+    } else {
+      nameEl.textContent = 'Ninguna actividad en curso';
+      stopBtn.classList.add('hidden');
+      if(timerInterval) clearInterval(timerInterval);
+    }
+    updateTimerDisplay();
+    renderHistory();
+  };
+
+  async function startActivity(activityType, comment='') {
+    const startTime = Date.now();
+    currentActivity = { name: activityType, startTime, startComment: comment };
+    updateUIState();
+    try {
+      await fetch('/api/reportes', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ operario: OPERATOR_NAME, activityType, startTime, startComment: comment })
+      });
+    } catch(err) { console.error(err); }
+  }
+
+  async function stopActivity(comment='') {
+    if(!currentActivity) return;
+    const endTime = Date.now();
+    const durationMs = endTime - currentActivity.startTime;
+    const activityRecord = {
+      operario: OPERATOR_NAME,
+      activityType: currentActivity.name,
+      startTime: currentActivity.startTime,
+      endTime,
+      durationMs,
+      startComment: currentActivity.startComment || null,
+      endComment: comment || null
+    };
+    activitiesHistory.unshift(activityRecord);
+    updateUIState();
+    currentActivity = null;
+    try {
+      await fetch('/api/reportes', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(activityRecord)
+      });
+    } catch(err){ console.error(err); }
+  }
+
+  const renderHistory = () => {
+    const container = document.getElementById('history-list');
+    container.innerHTML = '';
+    if(!activitiesHistory.length) {
+      document.getElementById('empty-history-message').classList.remove('hidden');
+      return;
+    }
+    document.getElementById('empty-history-message').classList.add('hidden');
+    activitiesHistory.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'p-3 border rounded bg-white shadow';
+      const start = new Date(item.startTime).toLocaleString('es-ES');
+      const end = item.endTime ? new Date(item.endTime).toLocaleString('es-ES') : 'N/A';
+      div.innerHTML = `<strong>${item.activityType}</strong>
+                       <div class="text-sm">Inicio: ${start} — Fin: ${end} — Duración: <strong>${formatDuration(item.durationMs)}</strong></div>
+                       ${item.startComment ? `<div class="text-xs mt-1 p-1 bg-indigo-50 rounded">Inicio: ${item.startComment}</div>` : ''}
+                       ${item.endComment ? `<div class="text-xs mt-1 p-1 bg-yellow-50 rounded">Fin: ${item.endComment}</div>` : ''}`;
+      container.appendChild(div);
+    });
+  };
+
+  window.promptForComment = (action, activityType=null)=>{
+    document.getElementById('comment-input').value='';
+    document.getElementById('modal-action-type').value = action;
+    document.getElementById('modal-activity-type').value = activityType || (currentActivity?currentActivity.name:'');
+    document.getElementById('comment-modal-title').textContent = action==='start' ? `Comentario de Inicio: ${activityType}` : `Comentario de Finalización: ${currentActivity ? currentActivity.name : ''}`;
+    document.getElementById('comment-modal').classList.remove('hidden');
+  };
+
+  window.closeCommentModal = (omit)=>{
+    const comment = omit ? '' : document.getElementById('comment-input').value.trim();
+    const action = document.getElementById('modal-action-type').value;
+    const activityType = document.getElementById('modal-activity-type').value;
+    document.getElementById('comment-modal').classList.add('hidden');
+    if(action==='start') startActivity(activityType, comment);
+    else stopActivity(comment);
+  };
+
+  async function clearAllData(){
+    if(!confirm("Confirmar borrado de TODO el historial de este usuario?")) return;
+    activitiesHistory = [];
+    currentActivity=null;
+    updateUIState();
+    try {
+      await fetch('/api/reportes/clear', { method:'POST' });
+    } catch(err){ console.error(err); }
+  }
+
+  async function generateReportAndSend(){
+    if(!activitiesHistory.length) return alert("No hay datos para enviar.");
+    const rows = activitiesHistory.map(a=>{
+      const start = new Date(a.startTime).toLocaleString('es-ES');
+      const end = a.endTime ? new Date(a.endTime).toLocaleString('es-ES') : 'N/A';
+      const duration = formatDuration(a.durationMs);
+      return `<tr>
+        <td style="padding:8px;border:1px solid #ddd">${a.activityType}</td>
+        <td style="padding:8px;border:1px solid #ddd">${start}</td>
+        <td style="padding:8px;border:1px solid #ddd">${end}</td>
+        <td style="padding:8px;border:1px solid #ddd">${duration}</td>
+        <td style="padding:8px;border:1px solid #ddd">${a.startComment || '-'}</td>
+        <td style="padding:8px;border:1px solid #ddd">${a.endComment || '-'}</td>
+      </tr>`;
+    }).join('');
+
+    const htmlBody = `
+      <h2>Reporte diario – ${OPERATOR_NAME} (${OPERATOR_CODE})</h2>
+      <table style="border-collapse:collapse;width:100%;font-family:Arial,Helvetica,sans-serif">
+        <thead>
+          <tr>
+            <th style="padding:8px;border:1px solid #ddd;background:#f3f4f6">Actividad</th>
+            <th style="padding:8px;border:1px solid #ddd;background:#f3f4f6">Inicio</th>
+            <th style="padding:8px;border:1px solid #ddd;background:#f3f4f6">Fin</th>
+            <th style="padding:8px;border:1px solid #ddd;background:#f3f4f6">Duración</th>
+            <th style="padding:8px;border:1px solid #ddd;background:#f3f4f6">Comentario inicio</th>
+            <th style="padding:8px;border:1px solid #ddd;background:#f3f4f6">Comentario fin</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+    const subject = `Reporte diario – ${OPERATOR_NAME} (${OPERATOR_CODE})`;
+
+    try {
+      const resp = await fetch(REPORT_FUNCTION_URL, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({subject,recipient:REPORT_RECIPIENT,html:htmlBody,text:`Reporte generado por ${OPERATOR_NAME}`})
+      });
+      if(resp.ok){
+        alert("✅ Reporte enviado correctamente.");
+        if(confirm("¿Deseas borrar todos los registros del día?")) clearAllData();
+      } else {
+        const json = await resp.json();
+        console.error("Error:", json);
+        alert("Error al enviar el reporte");
+      }
+    } catch(err){ console.error(err); alert("Error al enviar el reporte"); }
+  }
+
+  function initApp(){
+    renderActivityButtons();
+    updateUIState();
+  }
+
+  window.onload = initApp;
+</script>
+</body>
+</html>

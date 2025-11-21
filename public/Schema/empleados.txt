@@ -1,0 +1,23 @@
+db.createCollection("empleados", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["userId","code","nombre","rol","createdAt"],
+      properties: {
+        userId: { bsonType: "string" },
+        code: { bsonType: "string" },
+        nombre: { bsonType: "string" },
+        rol: { enum: ["LIDER","OPERARIO","ADMIN","MECANICO","SUPERVISOR"] },
+        reportsTo: { bsonType: ["string","null"] },
+        leaderOf: { bsonType: ["array"], items: { bsonType: "string" } },
+        telefono: { bsonType: ["string","null"] },
+        linea: { bsonType: ["string","null"] },
+        activo: { bsonType: "bool", description: "si el empleado está activo" },
+        meta: { bsonType: "object" },
+        createdAt: { bsonType: "date" },
+        updatedAt: { bsonType: "date" }
+      }
+    }
+  },
+  validationLevel: "moderate"
+});

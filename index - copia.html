@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Producción</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <img src="https://www.maderasaguilar.com/wp-content/uploads/2023/09/cropped-Favicon.png" alt="Logo">
+        </div>
+        <a href="index.html">Dashboard</a>
+        <a href="turno.html">Turnos</a>
+        <a href="historico.html">Histórico</a>
+    </div>
+
+    <div class="main-content">
+        <h1>Producción por Turnos</h1>
+
+        <div class="card">
+            <h2>Producción Últimos 3 Turnos</h2>
+            <canvas id="turnosChart" class="chart-container"></canvas>
+        </div>
+
+        <div class="card">
+            <h2>Productividad por Turno (%)</h2>
+            <canvas id="productividadChart" class="chart-container"></canvas>
+        </div>
+    </div>
+
+    <script src="js/index.js"></script>
+</body>
+</html>

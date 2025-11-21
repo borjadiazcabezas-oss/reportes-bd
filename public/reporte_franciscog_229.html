@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Registro de Turno - Líder</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<style>
+  body { font-family: Inter, Arial, sans-serif; background:#f3f4f6 }
+  .action-button{ transition:.12s }
+  .logo { width:40px; height:40px }
+  .section-title { font-weight:600; color:#1F4E79 } /* azul corporativo */
+  .submit-button { background:#1F4E79; color:white }
+  .submit-button:hover { background:#163955 }
+</style>
+</head>
+<body class="p-4">
+<div class="max-w-4xl mx-auto bg-white p-4 rounded-xl shadow">
+  <header class="mb-4 flex items-center">
+    <img src="images/logo.png" alt="Logo" width="40" height="40" class="inline-block mr-2">
+    <h1 class="text-2xl font-bold">Registro de Turno - Líder</h1>
+  </header>
+
+  <div>Usuario: <span id="operator-name">Francisco Garcia (229)</span></div>
+
+  <div id="form-container"></div>
+
+  <div class="mt-4">
+    <button onclick="submitReport()" class="submit-button px-4 py-2 rounded font-semibold">Enviar Reporte</button>
+  </div>
+</div>
+
+<script>
+const OPERATOR_NAME = "Francisco Garcia";
+const OPERATOR_CODE = "229";
+let userId = "user_229";
+
+const formContainer = document.getElementById('form-container');
+
+// Función para crear una fila de producción/reparación con Palets y Tapas fijos
+function createRow(section){
+  const div = document.createElement('div');
+  div.className = "grid grid-cols-1 md:grid-cols-4 gap-4 mt-2 row-entry";
+
+  div.innerHTML = `
+    <select class="${section}-modelo w-full border rounded p-2">
+      <option>CHEP 1210</option>
+      <option>CHEP 1208</option>
+      <option>IPP 1208</option>
+      <option>IPP 1210</option>
+      <option>PR80</option>
+      <option>UK 100</option>
+      <option>AZ 80</option>
+      <option>AZ 100</option>
+      <option>EUR-UIC</option>
+      <option>OTROS</option>
+    </select>
+    <input type="number" class="${section}-palets w-full border rounded p-2" placeholder="Palets" min="0">
+    <input type="number" class="${section}-tapas w-full border rounded p-2" placeholder="Tapas" min="0">
+    <button type="button" class="px-2 py-1 bg-gray-200 rounded" onclick="this.parentNode.remove()">Eliminar</button>
+  `;
+  return div;
+}
+
+formContainer.innerHTML = `
+  <h2 class="section-title mt-4">Producción</h2>
+  <div id="produccion-container"></div>
+  <button type="button" class="mt-2 px-3 py-1 bg-green-600 text-white rounded" onclick="addRow('produccion')">Añadir otra producción</button>
+
+  <h2 class="section-title mt-4">Reparación</h2>
+  <div id="reparacion-container"></div>
+  <button type="button" class="mt-2 px-3 py-1 bg-orange-600 text-white rounded" onclick="addRow('reparacion')">Añadir otra reparación</button>
+
+  <h2 class="section-title mt-4">Mermas</h2>
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <input type="number" class="mermas-palets w-full border rounded p-2" placeholder="Palets" min="0">
+    <input type="number" class="mermas-maderas w-full border rounded p-2" placeholder="Maderas" min="0">
+    <input type="number" class="mermas-largo w-full border rounded p-2" placeholder="Largo">
+    <input type="number" class="mermas-ancho w-full border rounded p-2" placeholder="Ancho">
+    <input type="number" class="mermas-alto w-full border rounded p-2" placeholder="Alto">
+  </div>
+
+  <h2 class="section-title mt-4">Recuperación</h2>
+  <select id="recuperacion-tipo" class="w-full border rounded p-2 mb-2">
+    <option value="retestado">Retestado</option>
+    <option value="otros">Otros</option>
+  </select>
+  <div id="recuperacion-detalles" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-2">
+    <input type="number" class="rec-largo w-full border rounded p-2" placeholder="Largo">
+    <input type="number" class="rec-ancho w-full border rounded p-2" placeholder="Ancho">
+    <input type="number" class="rec-alto w-full border rounded p-2" placeholder="Alto">
+    <input type="number" class="rec-cantidad w-full border rounded p-2" placeholder="Cantidad">
+  </div>
+
+  <h2 class="section-title mt-4">Incidencias</h2>
+  <textarea class="inc-mantenimiento w-full border rounded p-2 mb-2" rows="3" placeholder="Incidencias mantenimiento"></textarea>
+  <textarea class="inc-produccion w-full border rounded p-2" rows="3" placeholder="Incidencias producción"></textarea>
+`;
+
+addRow('produccion');
+addRow('reparacion');
+
+// Funciones
+function addRow(section){
+  const container = document.getElementById(section+'-container');
+  container.appendChild(createRow(section));
+}
+
+document.getElementById('recuperacion-tipo').addEventListener('change', ()=>{
+  document.getElementById('recuperacion-detalles').style.display = 'grid';
+});
+
+async function submitReport(){
+  const produccion = Array.from(document.querySelectorAll('#produccion-container .row-entry')).map(r=>({
+    modelo: r.querySelector('.produccion-modelo').value,
+    palets: parseInt(r.querySelector('.produccion-palets').value||0),
+    tapas: parseInt(r.querySelector('.produccion-tapas').value||0)
+  }));
+
+  const reparacion = Array.from(document.querySelectorAll('#reparacion-container .row-entry')).map(r=>({
+    modelo: r.querySelector('.reparacion-modelo').value,
+    palets: parseInt(r.querySelector('.reparacion-palets').value||0),
+    tapas: parseInt(r.querySelector('.reparacion-tapas').value||0)
+  }));
+
+  const report = {
+    lider: OPERATOR_NAME,
+    userId,
+    produccion,
+    reparacion,
+    mermas: {
+      palets: parseInt(document.querySelector('.mermas-palets').value||0),
+      maderas: parseInt(document.querySelector('.mermas-maderas').value||0),
+      largo: parseInt(document.querySelector('.mermas-largo').value||0),
+      ancho: parseInt(document.querySelector('.mermas-ancho').value||0),
+      alto: parseInt(document.querySelector('.mermas-alto').value||0)
+    },
+    recuperacion: {
+      tipo: document.getElementById('recuperacion-tipo').value,
+      largo: parseInt(document.querySelector('.rec-largo').value||0),
+      ancho: parseInt(document.querySelector('.rec-ancho').value||0),
+      alto: parseInt(document.querySelector('.rec-alto').value||0),
+      cantidad: parseInt(document.querySelector('.rec-cantidad').value||0)
+    },
+    incidencias: {
+      mantenimiento: document.querySelector('.inc-mantenimiento').value,
+      produccion: document.querySelector('.inc-produccion').value
+    },
+    fecha: new Date().toISOString()
+  };
+
+  try{
+    const resp = await fetch('/api/reportes', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(report)
+    });
+    if(resp.ok){
+      alert('✅ Reporte enviado correctamente');
+      document.querySelectorAll('input, textarea').forEach(i=>i.value='');
+      document.getElementById('produccion-container').innerHTML='';
+      document.getElementById('reparacion-container').innerHTML='';
+      addRow('produccion');
+      addRow('reparacion');
+    } else {
+      const json = await resp.json();
+      alert('Error al enviar: ' + (json.error||''));
+    }
+  } catch(err){
+    console.error(err);
+    alert('Error al enviar el reporte');
+  }
+}
+</script>
+</body>
+</html>

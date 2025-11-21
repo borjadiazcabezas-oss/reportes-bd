@@ -1,0 +1,9 @@
+﻿# Insertar al inicio de server.js
+import dotenv from 'dotenv';
+dotenv.config();
+
+# Ejemplo (CommonJS):
+// require('dotenv').config();
+// const cors = require('cors');
+// const corsConfig = require('./src/middleware/corsConfig').default;
+// app.use(cors(corsConfig));

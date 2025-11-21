@@ -1,0 +1,4907 @@
+📄 Descripción del Proyecto – Sistema de Reportes de Producción, Líderes y Empleados
+
+El objetivo del proyecto es crear un sistema completo de captación, almacenamiento y análisis de datos de producción industrial, utilizando MongoDB Atlas como almacenamiento temporal y una base de datos local para análisis avanzados.
+
+El sistema se divide en dos niveles de reporte, correspondientes a Operarios y Líderes de Equipo, y un nivel de análisis destinado a Gerencia y Dirección de Producción.
+
+🔵 1. Reportes de Operarios (Registro de Actividades)
+
+Cada operario dispone de una página individual donde registra en tiempo real su actividad mediante botones (Producción, Avería, Limpieza, Mantenimiento, Cambio, Arreglo de Palets, Otros).
+Cada actividad queda guardada con:
+
+Hora de inicio
+
+Hora de fin
+
+Duración
+
+Comentarios opcionales
+
+Tipo de actividad
+
+Estos registros permiten calcular:
+
+✔ Horas productivas
+
+(Solo actividades de Producción)
+
+✔ Horas no productivas
+
+(Avería, Limpieza, Mantenimiento, Cambios, etc.)
+
+Estos datos se envían automáticamente a MongoDB Atlas.
+
+🔵 2. Reportes de Líderes de Equipo
+
+Los líderes registran:
+
+✔ Producción, incluyendo:
+
+Modelo (CHEP, IPP, PR80, UK100, AZ80, AZ100, EUR-UIC, Otros)
+
+Palets fabricados
+
+Tapas fabricadas
+
+Posibilidad de añadir varias líneas de producción
+
+✔ Reparación, con la misma estructura
+
+Modelo
+
+Palets reparados
+
+Tapas reparadas
+
+✔ Mermas
+
+Número de palets perdidos
+
+Maderas consumidas
+
+Dimensiones de la madera
+
+✔ Recuperación, con selección entre:
+
+Retestado
+
+Otros
+Cada uno con:
+
+Dimensiones
+
+Cantidad
+
+✔ Incidencias
+
+Incidencias de Mantenimiento
+
+Incidencias de Producción
+
+El sistema detecta automáticamente el turno del líder mediante la hora del envío:
+
+06:00–14:00 → Turno 1
+
+14:00–22:00 → Turno 2
+
+22:00–06:00 → Turno 3
+
+Los datos también se envían a MongoDB Atlas.
+
+🔵 3. Doble Productividad (Criterio Gerencial)
+
+El sistema calculará dos indicadores distintos:
+
+1️⃣ Productividad Relativa (objetivo base del turno)
+
+El objetivo productivo por turno es:
+
+🎯 2500 palets por turno
+
+Fórmula:
+
+productividad_relativa = (palets_reales / 2500) * 100
+
+2️⃣ Productividad Real (en función de horas efectivas)
+
+Se descontarán todas las horas que NO sean producción:
+(averías, mantenimiento, cambios, limpieza, etc.)
+
+horas_productivas = horas_totales - horas_no_productivas
+productividad_real = palets_reales / horas_productivas
+
+
+Esta productividad muestra el rendimiento verdadero del equipo según el tiempo realmente dedicado a producir.
+
+Es decir: Productividad relativa mide cumplimiento del objetivo.
+Productividad real mide eficiencia efectiva.
+
+🔵 4. Arquitectura del Sistema
+
+El proyecto está dividido en dos sistemas independientes:
+
+🟩 Sistema REMOTO (Vercel + MongoDB Atlas)
+
+Aloja las páginas de Operarios y Líderes
+
+Manda los datos directamente a MongoDB Atlas
+
+Gerencia puede consultar los análisis desde el móvil
+
+🟦 Sistema LOCAL (PC del Responsable de Producción)
+
+Permite sincronizar datos desde MongoDB Atlas
+
+Descarga los datos diariamente
+
+Los guarda en una base de datos local
+
+Elimina los datos descargados de Atlas para ahorrar espacio
+
+Realiza análisis completos y cálculos de productividad
+
+De esta forma, MongoDB Atlas funciona como:
+
+📦 Un almacén temporal seguro,
+
+permitiendo que los operarios reporten sin necesidad de que el PC esté encendido.
+
+🔵 5. Objetivo General del Proyecto
+
+El objetivo global es disponer de un sistema seguro, automatizado y fiable, donde:
+
+Los operarios reportan actividades fácilmente.
+
+Los líderes reportan producción sin riesgo de errores.
+
+MongoDB Atlas recibe todos los datos en tiempo real.
+
+La base de datos local permite análisis avanzados sin depender de internet.
+
+Gerencia conoce la productividad en cualquier momento desde el sistema remoto.
+
+El sistema calcula dos productividades para un análisis más realista.
+
+Ten en cuenta que el numero de palets que nos de cada lider en cada turno, será en numero de palets por cada no lider por turno.
+
+NO LIDER  { name: "Eloy Quiñones", code: "40", file: "reporte_eloy_40.html", userId: "user_40" },
+LIDER  { name: "Antonio Montes", code: "120", file: "reporte_antonio_120.html", userId: "user_120" },
+NO LIDER  { name: "Carlos Javier Rivera", code: "158", file: "reporte_carlos_158.html", userId: "user_158" },
+NO LIDER SU LIDER ES 178 { name: "Humberto Mariscal", code: "177", file: "reporte_humberto_177.html", userId: "user_177" },
+LIDER  { name: "Jonatan Escarraman", code: "178", file: "reporte_jonatan_178.html", userId: "user_178" },
+NO LIDER SU LIDER ES 229 { name: "Jose Gregorio Sarti", code: "196", file: "reporte_joseg_196.html", userId: "user_196" },
+NO LIDER SU LIDER ES 120 { name: "Francisco Quiñones", code: "199", file: "reporte_franciscoq_199.html", userId: "user_199" },
+NO LIDER SU LIDER ES 229 { name: "Juan Jose Sarti", code: "203", file: "reporte_juanjose_203.html", userId: "user_203" },
+NO LIDER SU LIDER ES 229 { name: "Juan Carlos Ugueto", code: "204", file: "reporte_juancarlos_204.html", userId: "user_204" },
+LIDER  { name: "Francisco Garcia", code: "229", file: "reporte_franciscog_229.html", userId: "user_229" },
+NO LIDER  { name: "Francisco Romero", code: "239", file: "reporte_franciscor_239.html", userId: "user_239" },
+NO LIDER SU LIDER ES 229 { name: "Antonio Ramos", code: "243", file: "reporte_antonior_243.html", userId: "user_243" },
+NO LIDER  { name: "Juan Manuel Baez", code: "244", file: "reporte_juanmanuel_244.html", userId: "user_244" },
+NO LIDER SU LIDER ES 120 { name: "Josue Cortes", code: "246", file: "reporte_josue_246.html", userId: "user_246" },
+NO LIDER SU LIDER ES 178 { name: "Angel Luis Torres", code: "250", file: "reporte_angel_250.html", userId: "user_250" },
+NO LIDER SU LIDER ES 120 { name: "Francisco Javier Herrera", code: "251", file: "reporte_franciscoj_251.html", userId: "user_251" },
+NO LIDER SU LIDER ES 178 { name: "José Pérez", code: "252", file: "reporte_josep_252.html", userId: "user_252" }
+
+Reportes No Lideres:
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Registro de Turno - Reporte</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <style>
+    body { font-family: Inter, Arial, sans-serif; background:#f3f4f6 }
+    .action-button{ transition:.12s }
+  </style>
+</head>
+<body class="p-4">
+  <div class="max-w-4xl mx-auto bg-white p-4 rounded-xl shadow">
+    <header class="mb-4">
+      <h1 class="text-2xl font-bold">Registro de Turno</h1>
+      <div class="mt-2 text-sm text-gray-600">Usuario: <span id="operator-name"></span></div>
+      <div class="mt-1 text-xs text-gray-500">Estado: <span id="user-id">Inicializando...</span></div>
+    </header>
+
+    <section class="mb-4 bg-green-50 p-4 rounded">
+      <h2 class="font-semibold">Actividad actual</h2>
+      <p id="current-activity-name" class="font-bold">Ninguna actividad en curso</p>
+      <div id="timer-box" class="text-3xl font-bold mt-2">00:00:00</div>
+      <button id="stop-button" class="mt-3 px-4 py-2 bg-red-600 text-white rounded hidden" onclick="promptForComment('stop')">FINALIZAR Y REGISTRAR</button>
+    </section>
+
+    <section class="mb-4">
+      <h2 class="font-semibold">Iniciar actividad</h2>
+      <div id="activity-buttons" class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3"></div>
+    </section>
+
+    <section>
+      <div class="flex justify-between items-center mb-2">
+        <h2 class="font-semibold">Historial</h2>
+        <div>
+          <button id="report-button" class="px-3 py-1 bg-blue-600 text-white rounded" onclick="generateReportAndSend()">📤 Mandar Reporte</button>
+          <button id="delete-button" class="px-3 py-1 ml-2 bg-gray-200 rounded" onclick="clearAllData()">🗑️ Borrar todo</button>
+        </div>
+      </div>
+      <div id="history-list" class="space-y-2"></div>
+      <p id="empty-history-message" class="text-gray-500">No hay registros guardados.</p>
+    </section>
+  </div>
+
+  <!-- Modal Comentario -->
+  <div id="comment-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white p-4 rounded max-w-md w-11/12">
+      <h3 id="comment-modal-title" class="font-bold mb-2">Comentario</h3>
+      <textarea id="comment-input" rows="4" class="w-full border p-2 rounded" placeholder="Comentario..."></textarea>
+      <div class="mt-3 flex justify-end space-x-2">
+        <button onclick="closeCommentModal(true)" class="px-3 py-1 bg-gray-200 rounded">Omitir</button>
+        <button onclick="closeCommentModal(false)" class="px-3 py-1 bg-green-600 text-white rounded">Guardar</button>
+      </div>
+      <input type="hidden" id="modal-action-type">
+      <input type="hidden" id="modal-activity-type">
+    </div>
+  </div>
+
+<script>
+  const OPERATOR_NAME = "__OPERATOR_NAME__";
+  const OPERATOR_CODE = "__OPERATOR_CODE__";
+  const REPORT_FUNCTION_URL = "/api/sendReport";
+  const REPORT_RECIPIENT = "borjadiazcabezas@gmail.com";
+
+  document.getElementById('operator-name').textContent = `${OPERATOR_NAME} (${OPERATOR_CODE})`;
+
+  const activityTypes = [
+    { type: 'Produccion', color: 'bg-green-600' },
+    { type: 'Limpieza', color: 'bg-yellow-600' },
+    { type: 'Averia', color: 'bg-red-600' },
+    { type: 'Mantenimiento', color: 'bg-blue-600' },
+    { type: 'Arreglo Palets', color: 'bg-purple-600' },
+    { type: 'Cambio', color: 'bg-orange-600' },
+    { type: 'OTROS', color: 'bg-gray-600' }
+  ];
+
+  const pad = n => String(n).padStart(2,'0');
+  const formatDuration = ms => {
+    if (!ms || ms < 0) return '00:00:00';
+    const s = Math.floor(ms/1000);
+    const h = Math.floor(s/3600);
+    const m = Math.floor((s%3600)/60);
+    const sec = s%60;
+    return `${pad(h)}:${pad(m)}:${pad(sec)}`;
+  };
+
+  let userId = crypto.randomUUID();
+  let currentActivity = null;
+  let timerInterval = null;
+  let activitiesHistory = [];
+
+  const updateTimerDisplay = () => {
+    if(currentActivity && currentActivity.startTime) {
+      const startMs = currentActivity.startTime;
+      document.getElementById('timer-box').textContent = formatDuration(Date.now() - startMs);
+    } else {
+      document.getElementById('timer-box').textContent = '00:00:00';
+    }
+  };
+
+  const renderActivityButtons = () => {
+    const container = document.getElementById('activity-buttons');
+    container.innerHTML = '';
+    activityTypes.forEach(a => {
+      const btn = document.createElement('button');
+      btn.className = `action-button p-3 rounded text-white font-bold ${a.color}`;
+      btn.textContent = a.type;
+      btn.onclick = () => {
+        if(currentActivity) {
+          if(currentActivity.name === a.type) return promptForComment('stop');
+          stopActivity().then(()=>promptForComment('start', a.type));
+        } else {
+          promptForComment('start', a.type);
+        }
+      };
+      container.appendChild(btn);
+    });
+  };
+
+  const updateUIState = () => {
+    const nameEl = document.getElementById('current-activity-name');
+    const stopBtn = document.getElementById('stop-button');
+    if(currentActivity) {
+      nameEl.textContent = currentActivity.name;
+      stopBtn.classList.remove('hidden');
+      if(timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(updateTimerDisplay, 1000);
+    } else {
+      nameEl.textContent = 'Ninguna actividad en curso';
+      stopBtn.classList.add('hidden');
+      if(timerInterval) clearInterval(timerInterval);
+    }
+    updateTimerDisplay();
+    renderHistory();
+  };
+
+  async function startActivity(activityType, comment='') {
+    const startTime = Date.now();
+    currentActivity = { name: activityType, startTime, startComment: comment };
+    updateUIState();
+    try {
+      await fetch('/api/reportes', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ operario: OPERATOR_NAME, activityType, startTime, startComment: comment })
+      });
+    } catch(err) { console.error(err); }
+  }
+
+  async function stopActivity(comment='') {
+    if(!currentActivity) return;
+    const endTime = Date.now();
+    const durationMs = endTime - currentActivity.startTime;
+    const activityRecord = {
+      operario: OPERATOR_NAME,
+      activityType: currentActivity.name,
+      startTime: currentActivity.startTime,
+      endTime,
+      durationMs,
+      startComment: currentActivity.startComment || null,
+      endComment: comment || null
+    };
+    activitiesHistory.unshift(activityRecord);
+    updateUIState();
+    currentActivity = null;
+    try {
+      await fetch('/api/reportes', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(activityRecord)
+      });
+    } catch(err){ console.error(err); }
+  }
+
+  const renderHistory = () => {
+    const container = document.getElementById('history-list');
+    container.innerHTML = '';
+    if(!activitiesHistory.length) {
+      document.getElementById('empty-history-message').classList.remove('hidden');
+      return;
+    }
+    document.getElementById('empty-history-message').classList.add('hidden');
+    activitiesHistory.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'p-3 border rounded bg-white shadow';
+      const start = new Date(item.startTime).toLocaleString('es-ES');
+      const end = item.endTime ? new Date(item.endTime).toLocaleString('es-ES') : 'N/A';
+      div.innerHTML = `<strong>${item.activityType}</strong>
+                       <div class="text-sm">Inicio: ${start} — Fin: ${end} — Duración: <strong>${formatDuration(item.durationMs)}</strong></div>
+                       ${item.startComment ? `<div class="text-xs mt-1 p-1 bg-indigo-50 rounded">Inicio: ${item.startComment}</div>` : ''}
+                       ${item.endComment ? `<div class="text-xs mt-1 p-1 bg-yellow-50 rounded">Fin: ${item.endComment}</div>` : ''}`;
+      container.appendChild(div);
+    });
+  };
+
+  window.promptForComment = (action, activityType=null)=>{
+    document.getElementById('comment-input').value='';
+    document.getElementById('modal-action-type').value = action;
+    document.getElementById('modal-activity-type').value = activityType || (currentActivity?currentActivity.name:'');
+    document.getElementById('comment-modal-title').textContent = action==='start' ? `Comentario de Inicio: ${activityType}` : `Comentario de Finalización: ${currentActivity ? currentActivity.name : ''}`;
+    document.getElementById('comment-modal').classList.remove('hidden');
+  };
+
+  window.closeCommentModal = (omit)=>{
+    const comment = omit ? '' : document.getElementById('comment-input').value.trim();
+    const action = document.getElementById('modal-action-type').value;
+    const activityType = document.getElementById('modal-activity-type').value;
+    document.getElementById('comment-modal').classList.add('hidden');
+    if(action==='start') startActivity(activityType, comment);
+    else stopActivity(comment);
+  };
+
+  async function clearAllData(){
+    if(!confirm("Confirmar borrado de TODO el historial de este usuario?")) return;
+    activitiesHistory = [];
+    currentActivity=null;
+    updateUIState();
+    try {
+      await fetch('/api/reportes/clear', { method:'POST' });
+    } catch(err){ console.error(err); }
+  }
+
+  async function generateReportAndSend(){
+    if(!activitiesHistory.length) return alert("No hay datos para enviar.");
+    const rows = activitiesHistory.map(a=>{
+      const start = new Date(a.startTime).toLocaleString('es-ES');
+      const end = a.endTime ? new Date(a.endTime).toLocaleString('es-ES') : 'N/A';
+      const duration = formatDuration(a.durationMs);
+      return `<tr>
+        <td style="padding:8px;border:1px solid #ddd">${a.activityType}</td>
+        <td style="padding:8px;border:1px solid #ddd">${start}</td>
+        <td style="padding:8px;border:1px solid #ddd">${end}</td>
+        <td style="padding:8px;border:1px solid #ddd">${duration}</td>
+        <td style="padding:8px;border:1px solid #ddd">${a.startComment || '-'}</td>
+        <td style="padding:8px;border:1px solid #ddd">${a.endComment || '-'}</td>
+      </tr>`;
+    }).join('');
+
+    const htmlBody = `
+      <h2>Reporte diario – ${OPERATOR_NAME} (${OPERATOR_CODE})</h2>
+      <table style="border-collapse:collapse;width:100%;font-family:Arial,Helvetica,sans-serif">
+        <thead>
+          <tr>
+            <th style="padding:8px;border:1px solid #ddd;background:#f3f4f6">Actividad</th>
+            <th style="padding:8px;border:1px solid #ddd;background:#f3f4f6">Inicio</th>
+            <th style="padding:8px;border:1px solid #ddd;background:#f3f4f6">Fin</th>
+            <th style="padding:8px;border:1px solid #ddd;background:#f3f4f6">Duración</th>
+            <th style="padding:8px;border:1px solid #ddd;background:#f3f4f6">Comentario inicio</th>
+            <th style="padding:8px;border:1px solid #ddd;background:#f3f4f6">Comentario fin</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+    const subject = `Reporte diario – ${OPERATOR_NAME} (${OPERATOR_CODE})`;
+
+    try {
+      const resp = await fetch(REPORT_FUNCTION_URL, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({subject,recipient:REPORT_RECIPIENT,html:htmlBody,text:`Reporte generado por ${OPERATOR_NAME}`})
+      });
+      if(resp.ok){
+        alert("✅ Reporte enviado correctamente.");
+        if(confirm("¿Deseas borrar todos los registros del día?")) clearAllData();
+      } else {
+        const json = await resp.json();
+        console.error("Error:", json);
+        alert("Error al enviar el reporte");
+      }
+    } catch(err){ console.error(err); alert("Error al enviar el reporte"); }
+  }
+
+  function initApp(){
+    renderActivityButtons();
+    updateUIState();
+  }
+
+  window.onload = initApp;
+</script>
+</body>
+</html>
+
+Reportes Lideres:
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Registro de Turno - Líder</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<style>
+  body { font-family: Inter, Arial, sans-serif; background:#f3f4f6 }
+  .action-button{ transition:.12s }
+  .logo { width:40px; height:40px }
+  .section-title { font-weight:600; color:#1F4E79 } /* azul corporativo */
+  .submit-button { background:#1F4E79; color:white }
+  .submit-button:hover { background:#163955 }
+</style>
+</head>
+<body class="p-4">
+<div class="max-w-4xl mx-auto bg-white p-4 rounded-xl shadow">
+  <header class="mb-4 flex items-center">
+    <img src="images/logo.png" alt="Logo" width="40" height="40" class="inline-block mr-2">
+    <h1 class="text-2xl font-bold">Registro de Turno - Líder</h1>
+  </header>
+
+  <div>Usuario: <span id="operator-name">Antonio Montes (120)</span></div>
+
+  <div id="form-container"></div>
+
+  <div class="mt-4">
+    <button onclick="submitReport()" class="submit-button px-4 py-2 rounded font-semibold">Enviar Reporte</button>
+  </div>
+</div>
+
+<script>
+const OPERATOR_NAME = "Antonio Montes";
+const OPERATOR_CODE = "120";
+let userId = "user_120";
+
+const formContainer = document.getElementById('form-container');
+
+// Función para crear una fila de producción/reparación con Palets y Tapas fijos
+function createRow(section){
+  const div = document.createElement('div');
+  div.className = "grid grid-cols-1 md:grid-cols-4 gap-4 mt-2 row-entry";
+
+  div.innerHTML = `
+    <select class="${section}-modelo w-full border rounded p-2">
+      <option>CHEP 1210</option>
+      <option>CHEP 1208</option>
+      <option>IPP 1208</option>
+      <option>IPP 1210</option>
+      <option>PR80</option>
+      <option>UK 100</option>
+      <option>AZ 80</option>
+      <option>AZ 100</option>
+      <option>EUR-UIC</option>
+      <option>OTROS</option>
+    </select>
+    <input type="number" class="${section}-palets w-full border rounded p-2" placeholder="Palets" min="0">
+    <input type="number" class="${section}-tapas w-full border rounded p-2" placeholder="Tapas" min="0">
+    <button type="button" class="px-2 py-1 bg-gray-200 rounded" onclick="this.parentNode.remove()">Eliminar</button>
+  `;
+  return div;
+}
+
+formContainer.innerHTML = `
+  <h2 class="section-title mt-4">Producción</h2>
+  <div id="produccion-container"></div>
+  <button type="button" class="mt-2 px-3 py-1 bg-green-600 text-white rounded" onclick="addRow('produccion')">Añadir otra producción</button>
+
+  <h2 class="section-title mt-4">Reparación</h2>
+  <div id="reparacion-container"></div>
+  <button type="button" class="mt-2 px-3 py-1 bg-orange-600 text-white rounded" onclick="addRow('reparacion')">Añadir otra reparación</button>
+
+  <h2 class="section-title mt-4">Mermas</h2>
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <input type="number" class="mermas-palets w-full border rounded p-2" placeholder="Palets" min="0">
+    <input type="number" class="mermas-maderas w-full border rounded p-2" placeholder="Maderas" min="0">
+    <input type="number" class="mermas-largo w-full border rounded p-2" placeholder="Largo">
+    <input type="number" class="mermas-ancho w-full border rounded p-2" placeholder="Ancho">
+    <input type="number" class="mermas-alto w-full border rounded p-2" placeholder="Alto">
+  </div>
+
+  <h2 class="section-title mt-4">Recuperación</h2>
+  <select id="recuperacion-tipo" class="w-full border rounded p-2 mb-2">
+    <option value="retestado">Retestado</option>
+    <option value="otros">Otros</option>
+  </select>
+  <div id="recuperacion-detalles" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-2">
+    <input type="number" class="rec-largo w-full border rounded p-2" placeholder="Largo">
+    <input type="number" class="rec-ancho w-full border rounded p-2" placeholder="Ancho">
+    <input type="number" class="rec-alto w-full border rounded p-2" placeholder="Alto">
+    <input type="number" class="rec-cantidad w-full border rounded p-2" placeholder="Cantidad">
+  </div>
+
+  <h2 class="section-title mt-4">Incidencias</h2>
+  <textarea class="inc-mantenimiento w-full border rounded p-2 mb-2" rows="3" placeholder="Incidencias mantenimiento"></textarea>
+  <textarea class="inc-produccion w-full border rounded p-2" rows="3" placeholder="Incidencias producción"></textarea>
+`;
+
+addRow('produccion');
+addRow('reparacion');
+
+// Funciones
+function addRow(section){
+  const container = document.getElementById(section+'-container');
+  container.appendChild(createRow(section));
+}
+
+document.getElementById('recuperacion-tipo').addEventListener('change', ()=>{
+  document.getElementById('recuperacion-detalles').style.display = 'grid';
+});
+
+async function submitReport(){
+  const produccion = Array.from(document.querySelectorAll('#produccion-container .row-entry')).map(r=>({
+    modelo: r.querySelector('.produccion-modelo').value,
+    palets: parseInt(r.querySelector('.produccion-palets').value||0),
+    tapas: parseInt(r.querySelector('.produccion-tapas').value||0)
+  }));
+
+  const reparacion = Array.from(document.querySelectorAll('#reparacion-container .row-entry')).map(r=>({
+    modelo: r.querySelector('.reparacion-modelo').value,
+    palets: parseInt(r.querySelector('.reparacion-palets').value||0),
+    tapas: parseInt(r.querySelector('.reparacion-tapas').value||0)
+  }));
+
+  const report = {
+    lider: OPERATOR_NAME,
+    userId,
+    produccion,
+    reparacion,
+    mermas: {
+      palets: parseInt(document.querySelector('.mermas-palets').value||0),
+      maderas: parseInt(document.querySelector('.mermas-maderas').value||0),
+      largo: parseInt(document.querySelector('.mermas-largo').value||0),
+      ancho: parseInt(document.querySelector('.mermas-ancho').value||0),
+      alto: parseInt(document.querySelector('.mermas-alto').value||0)
+    },
+    recuperacion: {
+      tipo: document.getElementById('recuperacion-tipo').value,
+      largo: parseInt(document.querySelector('.rec-largo').value||0),
+      ancho: parseInt(document.querySelector('.rec-ancho').value||0),
+      alto: parseInt(document.querySelector('.rec-alto').value||0),
+      cantidad: parseInt(document.querySelector('.rec-cantidad').value||0)
+    },
+    incidencias: {
+      mantenimiento: document.querySelector('.inc-mantenimiento').value,
+      produccion: document.querySelector('.inc-produccion').value
+    },
+    fecha: new Date().toISOString()
+  };
+
+  try{
+    const resp = await fetch('/api/reportes', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(report)
+    });
+    if(resp.ok){
+      alert('✅ Reporte enviado correctamente');
+      document.querySelectorAll('input, textarea').forEach(i=>i.value='');
+      document.getElementById('produccion-container').innerHTML='';
+      document.getElementById('reparacion-container').innerHTML='';
+      addRow('produccion');
+      addRow('reparacion');
+    } else {
+      const json = await resp.json();
+      alert('Error al enviar: ' + (json.error||''));
+    }
+  } catch(err){
+    console.error(err);
+    alert('Error al enviar el reporte');
+  }
+}
+</script>
+</body>
+</html>
+
+TREE F/ proyecto completo
+Listado de rutas de carpetas para el volumen WinToHDD
+El n·mero de serie del volumen es 1656-A7C0
+C:.
+ª   tree-f.txt
+ª   
++---local
+ª   ª   package-lock.json
+ª   ª   package.json
+ª   ª   process.env
+ª   ª   server.js
+ª   ª   
+ª   +---api
+ª   ª       clear.js
+ª   ª       fetchFromAtlas.js
+ª   ª       reportes.js
+ª   ª       sendReport.js
+ª   ª       sync.js
+ª   ª       
+ª   +---backend
+ª   ª   ª   index.js
+ª   ª   ª   server.js
+ª   ª   ª   
+ª   ª   +---models
+ª   ª           activity.js
+ª   ª           
+ª   +---node_modules
+ª   ª   ª   .package-lock.json
+ª   ª   ª   
+ª   ª   +---@mongodb-js
+ª   ª   ª   +---saslprep
+ª   ª   ª       ª   LICENSE
+ª   ª   ª       ª   package.json
+ª   ª   ª       ª   readme.md
+ª   ª   ª       ª   
+ª   ª   ª       +---dist
+ª   ª   ª               .esm-wrapper.mjs
+ª   ª   ª               browser.d.ts
+ª   ª   ª               browser.d.ts.map
+ª   ª   ª               browser.js
+ª   ª   ª               browser.js.map
+ª   ª   ª               code-points-data-browser.d.ts
+ª   ª   ª               code-points-data-browser.d.ts.map
+ª   ª   ª               code-points-data-browser.js
+ª   ª   ª               code-points-data-browser.js.map
+ª   ª   ª               code-points-data.d.ts
+ª   ª   ª               code-points-data.d.ts.map
+ª   ª   ª               code-points-data.js
+ª   ª   ª               code-points-data.js.map
+ª   ª   ª               code-points-src.d.ts
+ª   ª   ª               code-points-src.d.ts.map
+ª   ª   ª               code-points-src.js
+ª   ª   ª               code-points-src.js.map
+ª   ª   ª               generate-code-points.d.ts
+ª   ª   ª               generate-code-points.d.ts.map
+ª   ª   ª               generate-code-points.js
+ª   ª   ª               generate-code-points.js.map
+ª   ª   ª               index.d.ts
+ª   ª   ª               index.d.ts.map
+ª   ª   ª               index.js
+ª   ª   ª               index.js.map
+ª   ª   ª               memory-code-points.d.ts
+ª   ª   ª               memory-code-points.d.ts.map
+ª   ª   ª               memory-code-points.js
+ª   ª   ª               memory-code-points.js.map
+ª   ª   ª               node.d.ts
+ª   ª   ª               node.d.ts.map
+ª   ª   ª               node.js
+ª   ª   ª               node.js.map
+ª   ª   ª               util.d.ts
+ª   ª   ª               util.d.ts.map
+ª   ª   ª               util.js
+ª   ª   ª               util.js.map
+ª   ª   ª               
+ª   ª   +---@types
+ª   ª   ª   +---webidl-conversions
+ª   ª   ª   ª       index.d.ts
+ª   ª   ª   ª       LICENSE
+ª   ª   ª   ª       package.json
+ª   ª   ª   ª       README.md
+ª   ª   ª   ª       
+ª   ª   ª   +---whatwg-url
+ª   ª   ª       ª   index.d.ts
+ª   ª   ª       ª   LICENSE
+ª   ª   ª       ª   package.json
+ª   ª   ª       ª   README.md
+ª   ª   ª       ª   webidl2js-wrapper.d.ts
+ª   ª   ª       ª   
+ª   ª   ª       +---lib
+ª   ª   ª               URL-impl.d.ts
+ª   ª   ª               URL.d.ts
+ª   ª   ª               URLSearchParams-impl.d.ts
+ª   ª   ª               URLSearchParams.d.ts
+ª   ª   ª               
+ª   ª   +---accepts
+ª   ª   ª       HISTORY.md
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---body-parser
+ª   ª   ª   ª   HISTORY.md
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   
+ª   ª   ª   +---lib
+ª   ª   ª       ª   read.js
+ª   ª   ª       ª   utils.js
+ª   ª   ª       ª   
+ª   ª   ª       +---types
+ª   ª   ª               json.js
+ª   ª   ª               raw.js
+ª   ª   ª               text.js
+ª   ª   ª               urlencoded.js
+ª   ª   ª               
+ª   ª   +---bson
+ª   ª   ª   ª   bson.d.ts
+ª   ª   ª   ª   LICENSE.md
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   
+ª   ª   ª   +---etc
+ª   ª   ª   ª       prepare.js
+ª   ª   ª   ª       
+ª   ª   ª   +---lib
+ª   ª   ª   ª       bson.bundle.js
+ª   ª   ª   ª       bson.bundle.js.map
+ª   ª   ª   ª       bson.cjs
+ª   ª   ª   ª       bson.cjs.map
+ª   ª   ª   ª       bson.mjs
+ª   ª   ª   ª       bson.mjs.map
+ª   ª   ª   ª       bson.node.mjs
+ª   ª   ª   ª       bson.node.mjs.map
+ª   ª   ª   ª       bson.rn.cjs
+ª   ª   ª   ª       bson.rn.cjs.map
+ª   ª   ª   ª       
+ª   ª   ª   +---src
+ª   ª   ª   ª   ª   binary.ts
+ª   ª   ª   ª   ª   bson.ts
+ª   ª   ª   ª   ª   bson_value.ts
+ª   ª   ª   ª   ª   code.ts
+ª   ª   ª   ª   ª   constants.ts
+ª   ª   ª   ª   ª   db_ref.ts
+ª   ª   ª   ª   ª   decimal128.ts
+ª   ª   ª   ª   ª   double.ts
+ª   ª   ª   ª   ª   error.ts
+ª   ª   ª   ª   ª   extended_json.ts
+ª   ª   ª   ª   ª   index.ts
+ª   ª   ª   ª   ª   int_32.ts
+ª   ª   ª   ª   ª   long.ts
+ª   ª   ª   ª   ª   max_key.ts
+ª   ª   ª   ª   ª   min_key.ts
+ª   ª   ª   ª   ª   objectid.ts
+ª   ª   ª   ª   ª   parse_utf8.ts
+ª   ª   ª   ª   ª   regexp.ts
+ª   ª   ª   ª   ª   symbol.ts
+ª   ª   ª   ª   ª   timestamp.ts
+ª   ª   ª   ª   ª   
+ª   ª   ª   ª   +---parser
+ª   ª   ª   ª   ª   ª   calculate_size.ts
+ª   ª   ª   ª   ª   ª   deserializer.ts
+ª   ª   ª   ª   ª   ª   serializer.ts
+ª   ª   ª   ª   ª   ª   utils.ts
+ª   ª   ª   ª   ª   ª   
+ª   ª   ª   ª   ª   +---on_demand
+ª   ª   ª   ª   ª           index.ts
+ª   ª   ª   ª   ª           parse_to_elements.ts
+ª   ª   ª   ª   ª           
+ª   ª   ª   ª   +---utils
+ª   ª   ª   ª           byte_utils.ts
+ª   ª   ª   ª           latin.ts
+ª   ª   ª   ª           node_byte_utils.ts
+ª   ª   ª   ª           number_utils.ts
+ª   ª   ª   ª           string_utils.ts
+ª   ª   ª   ª           web_byte_utils.ts
+ª   ª   ª   ª           
+ª   ª   ª   +---vendor
+ª   ª   ª       +---base64
+ª   ª   ª       ª       base64.js
+ª   ª   ª       ª       LICENSE-MIT.txt
+ª   ª   ª       ª       package.json
+ª   ª   ª       ª       README.md
+ª   ª   ª       ª       
+ª   ª   ª       +---text-encoding
+ª   ª   ª           ª   index.js
+ª   ª   ª           ª   LICENSE.md
+ª   ª   ª           ª   package.json
+ª   ª   ª           ª   README.md
+ª   ª   ª           ª   
+ª   ª   ª           +---lib
+ª   ª   ª                   encoding-indexes.js
+ª   ª   ª                   encoding.js
+ª   ª   ª                   
+ª   ª   +---bytes
+ª   ª   ª       History.md
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       Readme.md
+ª   ª   ª       
+ª   ª   +---call-bind-apply-helpers
+ª   ª   ª   ª   .eslintrc
+ª   ª   ª   ª   .nycrc
+ª   ª   ª   ª   actualApply.d.ts
+ª   ª   ª   ª   actualApply.js
+ª   ª   ª   ª   applyBind.d.ts
+ª   ª   ª   ª   applyBind.js
+ª   ª   ª   ª   CHANGELOG.md
+ª   ª   ª   ª   functionApply.d.ts
+ª   ª   ª   ª   functionApply.js
+ª   ª   ª   ª   functionCall.d.ts
+ª   ª   ª   ª   functionCall.js
+ª   ª   ª   ª   index.d.ts
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   reflectApply.d.ts
+ª   ª   ª   ª   reflectApply.js
+ª   ª   ª   ª   tsconfig.json
+ª   ª   ª   ª   
+ª   ª   ª   +---.github
+ª   ª   ª   ª       FUNDING.yml
+ª   ª   ª   ª       
+ª   ª   ª   +---test
+ª   ª   ª           index.js
+ª   ª   ª           
+ª   ª   +---call-bound
+ª   ª   ª   ª   .eslintrc
+ª   ª   ª   ª   .nycrc
+ª   ª   ª   ª   CHANGELOG.md
+ª   ª   ª   ª   index.d.ts
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   tsconfig.json
+ª   ª   ª   ª   
+ª   ª   ª   +---.github
+ª   ª   ª   ª       FUNDING.yml
+ª   ª   ª   ª       
+ª   ª   ª   +---test
+ª   ª   ª           index.js
+ª   ª   ª           
+ª   ª   +---content-disposition
+ª   ª   ª       HISTORY.md
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---content-type
+ª   ª   ª       HISTORY.md
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---cookie
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       SECURITY.md
+ª   ª   ª       
+ª   ª   +---cookie-signature
+ª   ª   ª       History.md
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       Readme.md
+ª   ª   ª       
+ª   ª   +---cors
+ª   ª   ª   ª   CONTRIBUTING.md
+ª   ª   ª   ª   HISTORY.md
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   
+ª   ª   ª   +---lib
+ª   ª   ª           index.js
+ª   ª   ª           
+ª   ª   +---debug
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   
+ª   ª   ª   +---src
+ª   ª   ª           browser.js
+ª   ª   ª           common.js
+ª   ª   ª           index.js
+ª   ª   ª           node.js
+ª   ª   ª           
+ª   ª   +---depd
+ª   ª   ª   ª   History.md
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   Readme.md
+ª   ª   ª   ª   
+ª   ª   ª   +---lib
+ª   ª   ª       +---browser
+ª   ª   ª               index.js
+ª   ª   ª               
+ª   ª   +---dunder-proto
+ª   ª   ª   ª   .eslintrc
+ª   ª   ª   ª   .nycrc
+ª   ª   ª   ª   CHANGELOG.md
+ª   ª   ª   ª   get.d.ts
+ª   ª   ª   ª   get.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   set.d.ts
+ª   ª   ª   ª   set.js
+ª   ª   ª   ª   tsconfig.json
+ª   ª   ª   ª   
+ª   ª   ª   +---.github
+ª   ª   ª   ª       FUNDING.yml
+ª   ª   ª   ª       
+ª   ª   ª   +---test
+ª   ª   ª           get.js
+ª   ª   ª           index.js
+ª   ª   ª           set.js
+ª   ª   ª           
+ª   ª   +---ee-first
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---encodeurl
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---es-define-property
+ª   ª   ª   ª   .eslintrc
+ª   ª   ª   ª   .nycrc
+ª   ª   ª   ª   CHANGELOG.md
+ª   ª   ª   ª   index.d.ts
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   tsconfig.json
+ª   ª   ª   ª   
+ª   ª   ª   +---.github
+ª   ª   ª   ª       FUNDING.yml
+ª   ª   ª   ª       
+ª   ª   ª   +---test
+ª   ª   ª           index.js
+ª   ª   ª           
+ª   ª   +---es-errors
+ª   ª   ª   ª   .eslintrc
+ª   ª   ª   ª   CHANGELOG.md
+ª   ª   ª   ª   eval.d.ts
+ª   ª   ª   ª   eval.js
+ª   ª   ª   ª   index.d.ts
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   range.d.ts
+ª   ª   ª   ª   range.js
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   ref.d.ts
+ª   ª   ª   ª   ref.js
+ª   ª   ª   ª   syntax.d.ts
+ª   ª   ª   ª   syntax.js
+ª   ª   ª   ª   tsconfig.json
+ª   ª   ª   ª   type.d.ts
+ª   ª   ª   ª   type.js
+ª   ª   ª   ª   uri.d.ts
+ª   ª   ª   ª   uri.js
+ª   ª   ª   ª   
+ª   ª   ª   +---.github
+ª   ª   ª   ª       FUNDING.yml
+ª   ª   ª   ª       
+ª   ª   ª   +---test
+ª   ª   ª           index.js
+ª   ª   ª           
+ª   ª   +---es-object-atoms
+ª   ª   ª   ª   .eslintrc
+ª   ª   ª   ª   CHANGELOG.md
+ª   ª   ª   ª   index.d.ts
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   isObject.d.ts
+ª   ª   ª   ª   isObject.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   RequireObjectCoercible.d.ts
+ª   ª   ª   ª   RequireObjectCoercible.js
+ª   ª   ª   ª   ToObject.d.ts
+ª   ª   ª   ª   ToObject.js
+ª   ª   ª   ª   tsconfig.json
+ª   ª   ª   ª   
+ª   ª   ª   +---.github
+ª   ª   ª   ª       FUNDING.yml
+ª   ª   ª   ª       
+ª   ª   ª   +---test
+ª   ª   ª           index.js
+ª   ª   ª           
+ª   ª   +---escape-html
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       Readme.md
+ª   ª   ª       
+ª   ª   +---etag
+ª   ª   ª       HISTORY.md
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---express
+ª   ª   ª   ª   History.md
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   Readme.md
+ª   ª   ª   ª   
+ª   ª   ª   +---lib
+ª   ª   ª           application.js
+ª   ª   ª           express.js
+ª   ª   ª           request.js
+ª   ª   ª           response.js
+ª   ª   ª           utils.js
+ª   ª   ª           view.js
+ª   ª   ª           
+ª   ª   +---finalhandler
+ª   ª   ª       HISTORY.md
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---forwarded
+ª   ª   ª       HISTORY.md
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---fresh
+ª   ª   ª       HISTORY.md
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---function-bind
+ª   ª   ª   ª   .eslintrc
+ª   ª   ª   ª   .nycrc
+ª   ª   ª   ª   CHANGELOG.md
+ª   ª   ª   ª   implementation.js
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   
+ª   ª   ª   +---.github
+ª   ª   ª   ª       FUNDING.yml
+ª   ª   ª   ª       SECURITY.md
+ª   ª   ª   ª       
+ª   ª   ª   +---test
+ª   ª   ª           .eslintrc
+ª   ª   ª           index.js
+ª   ª   ª           
+ª   ª   +---get-intrinsic
+ª   ª   ª   ª   .eslintrc
+ª   ª   ª   ª   .nycrc
+ª   ª   ª   ª   CHANGELOG.md
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   
+ª   ª   ª   +---.github
+ª   ª   ª   ª       FUNDING.yml
+ª   ª   ª   ª       
+ª   ª   ª   +---test
+ª   ª   ª           GetIntrinsic.js
+ª   ª   ª           
+ª   ª   +---get-proto
+ª   ª   ª   ª   .eslintrc
+ª   ª   ª   ª   .nycrc
+ª   ª   ª   ª   CHANGELOG.md
+ª   ª   ª   ª   index.d.ts
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   Object.getPrototypeOf.d.ts
+ª   ª   ª   ª   Object.getPrototypeOf.js
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   Reflect.getPrototypeOf.d.ts
+ª   ª   ª   ª   Reflect.getPrototypeOf.js
+ª   ª   ª   ª   tsconfig.json
+ª   ª   ª   ª   
+ª   ª   ª   +---.github
+ª   ª   ª   ª       FUNDING.yml
+ª   ª   ª   ª       
+ª   ª   ª   +---test
+ª   ª   ª           index.js
+ª   ª   ª           
+ª   ª   +---gopd
+ª   ª   ª   ª   .eslintrc
+ª   ª   ª   ª   CHANGELOG.md
+ª   ª   ª   ª   gOPD.d.ts
+ª   ª   ª   ª   gOPD.js
+ª   ª   ª   ª   index.d.ts
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   tsconfig.json
+ª   ª   ª   ª   
+ª   ª   ª   +---.github
+ª   ª   ª   ª       FUNDING.yml
+ª   ª   ª   ª       
+ª   ª   ª   +---test
+ª   ª   ª           index.js
+ª   ª   ª           
+ª   ª   +---has-symbols
+ª   ª   ª   ª   .eslintrc
+ª   ª   ª   ª   .nycrc
+ª   ª   ª   ª   CHANGELOG.md
+ª   ª   ª   ª   index.d.ts
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   shams.d.ts
+ª   ª   ª   ª   shams.js
+ª   ª   ª   ª   tsconfig.json
+ª   ª   ª   ª   
+ª   ª   ª   +---.github
+ª   ª   ª   ª       FUNDING.yml
+ª   ª   ª   ª       
+ª   ª   ª   +---test
+ª   ª   ª       ª   index.js
+ª   ª   ª       ª   tests.js
+ª   ª   ª       ª   
+ª   ª   ª       +---shams
+ª   ª   ª               core-js.js
+ª   ª   ª               get-own-property-symbols.js
+ª   ª   ª               
+ª   ª   +---hasown
+ª   ª   ª   ª   .eslintrc
+ª   ª   ª   ª   .nycrc
+ª   ª   ª   ª   CHANGELOG.md
+ª   ª   ª   ª   index.d.ts
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   tsconfig.json
+ª   ª   ª   ª   
+ª   ª   ª   +---.github
+ª   ª   ª           FUNDING.yml
+ª   ª   ª           
+ª   ª   +---http-errors
+ª   ª   ª   ª   HISTORY.md
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   
+ª   ª   ª   +---node_modules
+ª   ª   ª       +---statuses
+ª   ª   ª               codes.json
+ª   ª   ª               HISTORY.md
+ª   ª   ª               index.js
+ª   ª   ª               LICENSE
+ª   ª   ª               package.json
+ª   ª   ª               README.md
+ª   ª   ª               
+ª   ª   +---iconv-lite
+ª   ª   ª   ª   Changelog.md
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   
+ª   ª   ª   +---.github
+ª   ª   ª   ª       dependabot.yml
+ª   ª   ª   ª       
+ª   ª   ª   +---.idea
+ª   ª   ª   ª   ª   iconv-lite.iml
+ª   ª   ª   ª   ª   modules.xml
+ª   ª   ª   ª   ª   vcs.xml
+ª   ª   ª   ª   ª   
+ª   ª   ª   ª   +---codeStyles
+ª   ª   ª   ª   ª       codeStyleConfig.xml
+ª   ª   ª   ª   ª       Project.xml
+ª   ª   ª   ª   ª       
+ª   ª   ª   ª   +---inspectionProfiles
+ª   ª   ª   ª           Project_Default.xml
+ª   ª   ª   ª           
+ª   ª   ª   +---encodings
+ª   ª   ª   ª   ª   dbcs-codec.js
+ª   ª   ª   ª   ª   dbcs-data.js
+ª   ª   ª   ª   ª   index.js
+ª   ª   ª   ª   ª   internal.js
+ª   ª   ª   ª   ª   sbcs-codec.js
+ª   ª   ª   ª   ª   sbcs-data-generated.js
+ª   ª   ª   ª   ª   sbcs-data.js
+ª   ª   ª   ª   ª   utf16.js
+ª   ª   ª   ª   ª   utf32.js
+ª   ª   ª   ª   ª   utf7.js
+ª   ª   ª   ª   ª   
+ª   ª   ª   ª   +---tables
+ª   ª   ª   ª           big5-added.json
+ª   ª   ª   ª           cp936.json
+ª   ª   ª   ª           cp949.json
+ª   ª   ª   ª           cp950.json
+ª   ª   ª   ª           eucjp.json
+ª   ª   ª   ª           gb18030-ranges.json
+ª   ª   ª   ª           gbk-added.json
+ª   ª   ª   ª           shiftjis.json
+ª   ª   ª   ª           
+ª   ª   ª   +---lib
+ª   ª   ª           bom-handling.js
+ª   ª   ª           index.d.ts
+ª   ª   ª           index.js
+ª   ª   ª           streams.js
+ª   ª   ª           
+ª   ª   +---inherits
+ª   ª   ª       inherits.js
+ª   ª   ª       inherits_browser.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---ipaddr.js
+ª   ª   ª   ª   ipaddr.min.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   
+ª   ª   ª   +---lib
+ª   ª   ª           ipaddr.js
+ª   ª   ª           ipaddr.js.d.ts
+ª   ª   ª           
+ª   ª   +---is-promise
+ª   ª   ª       index.d.ts
+ª   ª   ª       index.js
+ª   ª   ª       index.mjs
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       readme.md
+ª   ª   ª       
+ª   ª   +---kareem
+ª   ª   ª       CHANGELOG.md
+ª   ª   ª       index.d.ts
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       SECURITY.md
+ª   ª   ª       
+ª   ª   +---math-intrinsics
+ª   ª   ª   ª   .eslintrc
+ª   ª   ª   ª   abs.d.ts
+ª   ª   ª   ª   abs.js
+ª   ª   ª   ª   CHANGELOG.md
+ª   ª   ª   ª   floor.d.ts
+ª   ª   ª   ª   floor.js
+ª   ª   ª   ª   isFinite.d.ts
+ª   ª   ª   ª   isFinite.js
+ª   ª   ª   ª   isInteger.d.ts
+ª   ª   ª   ª   isInteger.js
+ª   ª   ª   ª   isNaN.d.ts
+ª   ª   ª   ª   isNaN.js
+ª   ª   ª   ª   isNegativeZero.d.ts
+ª   ª   ª   ª   isNegativeZero.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   max.d.ts
+ª   ª   ª   ª   max.js
+ª   ª   ª   ª   min.d.ts
+ª   ª   ª   ª   min.js
+ª   ª   ª   ª   mod.d.ts
+ª   ª   ª   ª   mod.js
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   pow.d.ts
+ª   ª   ª   ª   pow.js
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   round.d.ts
+ª   ª   ª   ª   round.js
+ª   ª   ª   ª   sign.d.ts
+ª   ª   ª   ª   sign.js
+ª   ª   ª   ª   tsconfig.json
+ª   ª   ª   ª   
+ª   ª   ª   +---.github
+ª   ª   ª   ª       FUNDING.yml
+ª   ª   ª   ª       
+ª   ª   ª   +---constants
+ª   ª   ª   ª       maxArrayLength.d.ts
+ª   ª   ª   ª       maxArrayLength.js
+ª   ª   ª   ª       maxSafeInteger.d.ts
+ª   ª   ª   ª       maxSafeInteger.js
+ª   ª   ª   ª       maxValue.d.ts
+ª   ª   ª   ª       maxValue.js
+ª   ª   ª   ª       
+ª   ª   ª   +---test
+ª   ª   ª           index.js
+ª   ª   ª           
+ª   ª   +---media-typer
+ª   ª   ª       HISTORY.md
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---memory-pager
+ª   ª   ª       .travis.yml
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       test.js
+ª   ª   ª       
+ª   ª   +---merge-descriptors
+ª   ª   ª       index.d.ts
+ª   ª   ª       index.js
+ª   ª   ª       license
+ª   ª   ª       package.json
+ª   ª   ª       readme.md
+ª   ª   ª       
+ª   ª   +---mime-db
+ª   ª   ª       db.json
+ª   ª   ª       HISTORY.md
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---mime-types
+ª   ª   ª       HISTORY.md
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       mimeScore.js
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---mongodb
+ª   ª   ª   ª   LICENSE.md
+ª   ª   ª   ª   mongodb.d.ts
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   tsconfig.json
+ª   ª   ª   ª   
+ª   ª   ª   +---etc
+ª   ª   ª   ª       prepare.js
+ª   ª   ª   ª       
+ª   ª   ª   +---lib
+ª   ª   ª   ª   ª   admin.js
+ª   ª   ª   ª   ª   admin.js.map
+ª   ª   ª   ª   ª   beta.d.ts
+ª   ª   ª   ª   ª   beta.js
+ª   ª   ª   ª   ª   beta.js.map
+ª   ª   ª   ª   ª   bson.js
+ª   ª   ª   ª   ª   bson.js.map
+ª   ª   ª   ª   ª   change_stream.js
+ª   ª   ª   ª   ª   change_stream.js.map
+ª   ª   ª   ª   ª   collection.js
+ª   ª   ª   ª   ª   collection.js.map
+ª   ª   ª   ª   ª   connection_string.js
+ª   ª   ª   ª   ª   connection_string.js.map
+ª   ª   ª   ª   ª   constants.js
+ª   ª   ª   ª   ª   constants.js.map
+ª   ª   ª   ª   ª   db.js
+ª   ª   ª   ª   ª   db.js.map
+ª   ª   ª   ª   ª   deps.js
+ª   ª   ª   ª   ª   deps.js.map
+ª   ª   ª   ª   ª   encrypter.js
+ª   ª   ª   ª   ª   encrypter.js.map
+ª   ª   ª   ª   ª   error.js
+ª   ª   ª   ª   ª   error.js.map
+ª   ª   ª   ª   ª   explain.js
+ª   ª   ª   ª   ª   explain.js.map
+ª   ª   ª   ª   ª   index.js
+ª   ª   ª   ª   ª   index.js.map
+ª   ª   ª   ª   ª   mongo_client.js
+ª   ª   ª   ª   ª   mongo_client.js.map
+ª   ª   ª   ª   ª   mongo_client_auth_providers.js
+ª   ª   ª   ª   ª   mongo_client_auth_providers.js.map
+ª   ª   ª   ª   ª   mongo_logger.js
+ª   ª   ª   ª   ª   mongo_logger.js.map
+ª   ª   ª   ª   ª   mongo_types.js
+ª   ª   ª   ª   ª   mongo_types.js.map
+ª   ª   ª   ª   ª   read_concern.js
+ª   ª   ª   ª   ª   read_concern.js.map
+ª   ª   ª   ª   ª   read_preference.js
+ª   ª   ª   ª   ª   read_preference.js.map
+ª   ª   ª   ª   ª   resource_management.js
+ª   ª   ª   ª   ª   resource_management.js.map
+ª   ª   ª   ª   ª   sessions.js
+ª   ª   ª   ª   ª   sessions.js.map
+ª   ª   ª   ª   ª   sort.js
+ª   ª   ª   ª   ª   sort.js.map
+ª   ª   ª   ª   ª   timeout.js
+ª   ª   ª   ª   ª   timeout.js.map
+ª   ª   ª   ª   ª   transactions.js
+ª   ª   ª   ª   ª   transactions.js.map
+ª   ª   ª   ª   ª   utils.js
+ª   ª   ª   ª   ª   utils.js.map
+ª   ª   ª   ª   ª   write_concern.js
+ª   ª   ª   ª   ª   write_concern.js.map
+ª   ª   ª   ª   ª   
+ª   ª   ª   ª   +---bulk
+ª   ª   ª   ª   ª       common.js
+ª   ª   ª   ª   ª       common.js.map
+ª   ª   ª   ª   ª       ordered.js
+ª   ª   ª   ª   ª       ordered.js.map
+ª   ª   ª   ª   ª       unordered.js
+ª   ª   ª   ª   ª       unordered.js.map
+ª   ª   ª   ª   ª       
+ª   ª   ª   ª   +---client-side-encryption
+ª   ª   ª   ª   ª   ª   auto_encrypter.js
+ª   ª   ª   ª   ª   ª   auto_encrypter.js.map
+ª   ª   ª   ª   ª   ª   client_encryption.js
+ª   ª   ª   ª   ª   ª   client_encryption.js.map
+ª   ª   ª   ª   ª   ª   crypto_callbacks.js
+ª   ª   ª   ª   ª   ª   crypto_callbacks.js.map
+ª   ª   ª   ª   ª   ª   errors.js
+ª   ª   ª   ª   ª   ª   errors.js.map
+ª   ª   ª   ª   ª   ª   mongocryptd_manager.js
+ª   ª   ª   ª   ª   ª   mongocryptd_manager.js.map
+ª   ª   ª   ª   ª   ª   state_machine.js
+ª   ª   ª   ª   ª   ª   state_machine.js.map
+ª   ª   ª   ª   ª   ª   
+ª   ª   ª   ª   ª   +---providers
+ª   ª   ª   ª   ª           aws.js
+ª   ª   ª   ª   ª           aws.js.map
+ª   ª   ª   ª   ª           azure.js
+ª   ª   ª   ª   ª           azure.js.map
+ª   ª   ª   ª   ª           gcp.js
+ª   ª   ª   ª   ª           gcp.js.map
+ª   ª   ª   ª   ª           index.js
+ª   ª   ª   ª   ª           index.js.map
+ª   ª   ª   ª   ª           
+ª   ª   ª   ª   +---cmap
+ª   ª   ª   ª   ª   ª   commands.js
+ª   ª   ª   ª   ª   ª   commands.js.map
+ª   ª   ª   ª   ª   ª   command_monitoring_events.js
+ª   ª   ª   ª   ª   ª   command_monitoring_events.js.map
+ª   ª   ª   ª   ª   ª   connect.js
+ª   ª   ª   ª   ª   ª   connect.js.map
+ª   ª   ª   ª   ª   ª   connection.js
+ª   ª   ª   ª   ª   ª   connection.js.map
+ª   ª   ª   ª   ª   ª   connection_pool.js
+ª   ª   ª   ª   ª   ª   connection_pool.js.map
+ª   ª   ª   ª   ª   ª   connection_pool_events.js
+ª   ª   ª   ª   ª   ª   connection_pool_events.js.map
+ª   ª   ª   ª   ª   ª   errors.js
+ª   ª   ª   ª   ª   ª   errors.js.map
+ª   ª   ª   ª   ª   ª   metrics.js
+ª   ª   ª   ª   ª   ª   metrics.js.map
+ª   ª   ª   ª   ª   ª   stream_description.js
+ª   ª   ª   ª   ª   ª   stream_description.js.map
+ª   ª   ª   ª   ª   ª   
+ª   ª   ª   ª   ª   +---auth
+ª   ª   ª   ª   ª   ª   ª   auth_provider.js
+ª   ª   ª   ª   ª   ª   ª   auth_provider.js.map
+ª   ª   ª   ª   ª   ª   ª   aws_temporary_credentials.js
+ª   ª   ª   ª   ª   ª   ª   aws_temporary_credentials.js.map
+ª   ª   ª   ª   ª   ª   ª   gssapi.js
+ª   ª   ª   ª   ª   ª   ª   gssapi.js.map
+ª   ª   ª   ª   ª   ª   ª   mongodb_aws.js
+ª   ª   ª   ª   ª   ª   ª   mongodb_aws.js.map
+ª   ª   ª   ª   ª   ª   ª   mongodb_oidc.js
+ª   ª   ª   ª   ª   ª   ª   mongodb_oidc.js.map
+ª   ª   ª   ª   ª   ª   ª   mongo_credentials.js
+ª   ª   ª   ª   ª   ª   ª   mongo_credentials.js.map
+ª   ª   ª   ª   ª   ª   ª   plain.js
+ª   ª   ª   ª   ª   ª   ª   plain.js.map
+ª   ª   ª   ª   ª   ª   ª   providers.js
+ª   ª   ª   ª   ª   ª   ª   providers.js.map
+ª   ª   ª   ª   ª   ª   ª   scram.js
+ª   ª   ª   ª   ª   ª   ª   scram.js.map
+ª   ª   ª   ª   ª   ª   ª   x509.js
+ª   ª   ª   ª   ª   ª   ª   x509.js.map
+ª   ª   ª   ª   ª   ª   ª   
+ª   ª   ª   ª   ª   ª   +---mongodb_oidc
+ª   ª   ª   ª   ª   ª           automated_callback_workflow.js
+ª   ª   ª   ª   ª   ª           automated_callback_workflow.js.map
+ª   ª   ª   ª   ª   ª           azure_machine_workflow.js
+ª   ª   ª   ª   ª   ª           azure_machine_workflow.js.map
+ª   ª   ª   ª   ª   ª           callback_workflow.js
+ª   ª   ª   ª   ª   ª           callback_workflow.js.map
+ª   ª   ª   ª   ª   ª           command_builders.js
+ª   ª   ª   ª   ª   ª           command_builders.js.map
+ª   ª   ª   ª   ª   ª           gcp_machine_workflow.js
+ª   ª   ª   ª   ª   ª           gcp_machine_workflow.js.map
+ª   ª   ª   ª   ª   ª           human_callback_workflow.js
+ª   ª   ª   ª   ª   ª           human_callback_workflow.js.map
+ª   ª   ª   ª   ª   ª           k8s_machine_workflow.js
+ª   ª   ª   ª   ª   ª           k8s_machine_workflow.js.map
+ª   ª   ª   ª   ª   ª           token_cache.js
+ª   ª   ª   ª   ª   ª           token_cache.js.map
+ª   ª   ª   ª   ª   ª           token_machine_workflow.js
+ª   ª   ª   ª   ª   ª           token_machine_workflow.js.map
+ª   ª   ª   ª   ª   ª           
+ª   ª   ª   ª   ª   +---handshake
+ª   ª   ª   ª   ª   ª       client_metadata.js
+ª   ª   ª   ª   ª   ª       client_metadata.js.map
+ª   ª   ª   ª   ª   ª       
+ª   ª   ª   ª   ª   +---wire_protocol
+ª   ª   ª   ª   ª       ª   compression.js
+ª   ª   ª   ª   ª       ª   compression.js.map
+ª   ª   ª   ª   ª       ª   constants.js
+ª   ª   ª   ª   ª       ª   constants.js.map
+ª   ª   ª   ª   ª       ª   on_data.js
+ª   ª   ª   ª   ª       ª   on_data.js.map
+ª   ª   ª   ª   ª       ª   responses.js
+ª   ª   ª   ª   ª       ª   responses.js.map
+ª   ª   ª   ª   ª       ª   shared.js
+ª   ª   ª   ª   ª       ª   shared.js.map
+ª   ª   ª   ª   ª       ª   
+ª   ª   ª   ª   ª       +---on_demand
+ª   ª   ª   ª   ª               document.js
+ª   ª   ª   ª   ª               document.js.map
+ª   ª   ª   ª   ª               
+ª   ª   ª   ª   +---cursor
+ª   ª   ª   ª   ª       abstract_cursor.js
+ª   ª   ª   ª   ª       abstract_cursor.js.map
+ª   ª   ª   ª   ª       aggregation_cursor.js
+ª   ª   ª   ª   ª       aggregation_cursor.js.map
+ª   ª   ª   ª   ª       change_stream_cursor.js
+ª   ª   ª   ª   ª       change_stream_cursor.js.map
+ª   ª   ª   ª   ª       client_bulk_write_cursor.js
+ª   ª   ª   ª   ª       client_bulk_write_cursor.js.map
+ª   ª   ª   ª   ª       explainable_cursor.js
+ª   ª   ª   ª   ª       explainable_cursor.js.map
+ª   ª   ª   ª   ª       find_cursor.js
+ª   ª   ª   ª   ª       find_cursor.js.map
+ª   ª   ª   ª   ª       list_collections_cursor.js
+ª   ª   ª   ª   ª       list_collections_cursor.js.map
+ª   ª   ª   ª   ª       list_indexes_cursor.js
+ª   ª   ª   ª   ª       list_indexes_cursor.js.map
+ª   ª   ª   ª   ª       list_search_indexes_cursor.js
+ª   ª   ª   ª   ª       list_search_indexes_cursor.js.map
+ª   ª   ª   ª   ª       run_command_cursor.js
+ª   ª   ª   ª   ª       run_command_cursor.js.map
+ª   ª   ª   ª   ª       
+ª   ª   ª   ª   +---gridfs
+ª   ª   ª   ª   ª       download.js
+ª   ª   ª   ª   ª       download.js.map
+ª   ª   ª   ª   ª       index.js
+ª   ª   ª   ª   ª       index.js.map
+ª   ª   ª   ª   ª       upload.js
+ª   ª   ª   ª   ª       upload.js.map
+ª   ª   ª   ª   ª       
+ª   ª   ª   ª   +---operations
+ª   ª   ª   ª   ª   ª   aggregate.js
+ª   ª   ª   ª   ª   ª   aggregate.js.map
+ª   ª   ª   ª   ª   ª   command.js
+ª   ª   ª   ª   ª   ª   command.js.map
+ª   ª   ª   ª   ª   ª   count.js
+ª   ª   ª   ª   ª   ª   count.js.map
+ª   ª   ª   ª   ª   ª   create_collection.js
+ª   ª   ª   ª   ª   ª   create_collection.js.map
+ª   ª   ª   ª   ª   ª   delete.js
+ª   ª   ª   ª   ª   ª   delete.js.map
+ª   ª   ª   ª   ª   ª   distinct.js
+ª   ª   ª   ª   ª   ª   distinct.js.map
+ª   ª   ª   ª   ª   ª   drop.js
+ª   ª   ª   ª   ª   ª   drop.js.map
+ª   ª   ª   ª   ª   ª   estimated_document_count.js
+ª   ª   ª   ª   ª   ª   estimated_document_count.js.map
+ª   ª   ª   ª   ª   ª   execute_operation.js
+ª   ª   ª   ª   ª   ª   execute_operation.js.map
+ª   ª   ª   ª   ª   ª   find.js
+ª   ª   ª   ª   ª   ª   find.js.map
+ª   ª   ª   ª   ª   ª   find_and_modify.js
+ª   ª   ª   ª   ª   ª   find_and_modify.js.map
+ª   ª   ª   ª   ª   ª   get_more.js
+ª   ª   ª   ª   ª   ª   get_more.js.map
+ª   ª   ª   ª   ª   ª   indexes.js
+ª   ª   ª   ª   ª   ª   indexes.js.map
+ª   ª   ª   ª   ª   ª   insert.js
+ª   ª   ª   ª   ª   ª   insert.js.map
+ª   ª   ª   ª   ª   ª   kill_cursors.js
+ª   ª   ª   ª   ª   ª   kill_cursors.js.map
+ª   ª   ª   ª   ª   ª   list_collections.js
+ª   ª   ª   ª   ª   ª   list_collections.js.map
+ª   ª   ª   ª   ª   ª   list_databases.js
+ª   ª   ª   ª   ª   ª   list_databases.js.map
+ª   ª   ª   ª   ª   ª   operation.js
+ª   ª   ª   ª   ª   ª   operation.js.map
+ª   ª   ª   ª   ª   ª   profiling_level.js
+ª   ª   ª   ª   ª   ª   profiling_level.js.map
+ª   ª   ª   ª   ª   ª   remove_user.js
+ª   ª   ª   ª   ª   ª   remove_user.js.map
+ª   ª   ª   ª   ª   ª   rename.js
+ª   ª   ª   ª   ª   ª   rename.js.map
+ª   ª   ª   ª   ª   ª   run_command.js
+ª   ª   ª   ª   ª   ª   run_command.js.map
+ª   ª   ª   ª   ª   ª   set_profiling_level.js
+ª   ª   ª   ª   ª   ª   set_profiling_level.js.map
+ª   ª   ª   ª   ª   ª   stats.js
+ª   ª   ª   ª   ª   ª   stats.js.map
+ª   ª   ª   ª   ª   ª   update.js
+ª   ª   ª   ª   ª   ª   update.js.map
+ª   ª   ª   ª   ª   ª   validate_collection.js
+ª   ª   ª   ª   ª   ª   validate_collection.js.map
+ª   ª   ª   ª   ª   ª   
+ª   ª   ª   ª   ª   +---client_bulk_write
+ª   ª   ª   ª   ª   ª       client_bulk_write.js
+ª   ª   ª   ª   ª   ª       client_bulk_write.js.map
+ª   ª   ª   ª   ª   ª       command_builder.js
+ª   ª   ª   ª   ª   ª       command_builder.js.map
+ª   ª   ª   ª   ª   ª       common.js
+ª   ª   ª   ª   ª   ª       common.js.map
+ª   ª   ª   ª   ª   ª       executor.js
+ª   ª   ª   ª   ª   ª       executor.js.map
+ª   ª   ª   ª   ª   ª       results_merger.js
+ª   ª   ª   ª   ª   ª       results_merger.js.map
+ª   ª   ª   ª   ª   ª       
+ª   ª   ª   ª   ª   +---search_indexes
+ª   ª   ª   ª   ª           create.js
+ª   ª   ª   ª   ª           create.js.map
+ª   ª   ª   ª   ª           drop.js
+ª   ª   ª   ª   ª           drop.js.map
+ª   ª   ª   ª   ª           update.js
+ª   ª   ª   ª   ª           update.js.map
+ª   ª   ª   ª   ª           
+ª   ª   ª   ª   +---sdam
+ª   ª   ª   ª           common.js
+ª   ª   ª   ª           common.js.map
+ª   ª   ª   ª           events.js
+ª   ª   ª   ª           events.js.map
+ª   ª   ª   ª           monitor.js
+ª   ª   ª   ª           monitor.js.map
+ª   ª   ª   ª           server.js
+ª   ª   ª   ª           server.js.map
+ª   ª   ª   ª           server_description.js
+ª   ª   ª   ª           server_description.js.map
+ª   ª   ª   ª           server_selection.js
+ª   ª   ª   ª           server_selection.js.map
+ª   ª   ª   ª           server_selection_events.js
+ª   ª   ª   ª           server_selection_events.js.map
+ª   ª   ª   ª           srv_polling.js
+ª   ª   ª   ª           srv_polling.js.map
+ª   ª   ª   ª           topology.js
+ª   ª   ª   ª           topology.js.map
+ª   ª   ª   ª           topology_description.js
+ª   ª   ª   ª           topology_description.js.map
+ª   ª   ª   ª           
+ª   ª   ª   +---src
+ª   ª   ª       ª   admin.ts
+ª   ª   ª       ª   beta.ts
+ª   ª   ª       ª   bson.ts
+ª   ª   ª       ª   change_stream.ts
+ª   ª   ª       ª   collection.ts
+ª   ª   ª       ª   connection_string.ts
+ª   ª   ª       ª   constants.ts
+ª   ª   ª       ª   db.ts
+ª   ª   ª       ª   deps.ts
+ª   ª   ª       ª   encrypter.ts
+ª   ª   ª       ª   error.ts
+ª   ª   ª       ª   explain.ts
+ª   ª   ª       ª   index.ts
+ª   ª   ª       ª   mongo_client.ts
+ª   ª   ª       ª   mongo_client_auth_providers.ts
+ª   ª   ª       ª   mongo_logger.ts
+ª   ª   ª       ª   mongo_types.ts
+ª   ª   ª       ª   read_concern.ts
+ª   ª   ª       ª   read_preference.ts
+ª   ª   ª       ª   resource_management.ts
+ª   ª   ª       ª   sessions.ts
+ª   ª   ª       ª   sort.ts
+ª   ª   ª       ª   timeout.ts
+ª   ª   ª       ª   transactions.ts
+ª   ª   ª       ª   utils.ts
+ª   ª   ª       ª   write_concern.ts
+ª   ª   ª       ª   
+ª   ª   ª       +---bulk
+ª   ª   ª       ª       common.ts
+ª   ª   ª       ª       ordered.ts
+ª   ª   ª       ª       unordered.ts
+ª   ª   ª       ª       
+ª   ª   ª       +---client-side-encryption
+ª   ª   ª       ª   ª   auto_encrypter.ts
+ª   ª   ª       ª   ª   client_encryption.ts
+ª   ª   ª       ª   ª   crypto_callbacks.ts
+ª   ª   ª       ª   ª   errors.ts
+ª   ª   ª       ª   ª   mongocryptd_manager.ts
+ª   ª   ª       ª   ª   state_machine.ts
+ª   ª   ª       ª   ª   
+ª   ª   ª       ª   +---providers
+ª   ª   ª       ª           aws.ts
+ª   ª   ª       ª           azure.ts
+ª   ª   ª       ª           gcp.ts
+ª   ª   ª       ª           index.ts
+ª   ª   ª       ª           
+ª   ª   ª       +---cmap
+ª   ª   ª       ª   ª   commands.ts
+ª   ª   ª       ª   ª   command_monitoring_events.ts
+ª   ª   ª       ª   ª   connect.ts
+ª   ª   ª       ª   ª   connection.ts
+ª   ª   ª       ª   ª   connection_pool.ts
+ª   ª   ª       ª   ª   connection_pool_events.ts
+ª   ª   ª       ª   ª   errors.ts
+ª   ª   ª       ª   ª   metrics.ts
+ª   ª   ª       ª   ª   stream_description.ts
+ª   ª   ª       ª   ª   
+ª   ª   ª       ª   +---auth
+ª   ª   ª       ª   ª   ª   auth_provider.ts
+ª   ª   ª       ª   ª   ª   aws_temporary_credentials.ts
+ª   ª   ª       ª   ª   ª   gssapi.ts
+ª   ª   ª       ª   ª   ª   mongodb_aws.ts
+ª   ª   ª       ª   ª   ª   mongodb_oidc.ts
+ª   ª   ª       ª   ª   ª   mongo_credentials.ts
+ª   ª   ª       ª   ª   ª   plain.ts
+ª   ª   ª       ª   ª   ª   providers.ts
+ª   ª   ª       ª   ª   ª   scram.ts
+ª   ª   ª       ª   ª   ª   x509.ts
+ª   ª   ª       ª   ª   ª   
+ª   ª   ª       ª   ª   +---mongodb_oidc
+ª   ª   ª       ª   ª           automated_callback_workflow.ts
+ª   ª   ª       ª   ª           azure_machine_workflow.ts
+ª   ª   ª       ª   ª           callback_workflow.ts
+ª   ª   ª       ª   ª           command_builders.ts
+ª   ª   ª       ª   ª           gcp_machine_workflow.ts
+ª   ª   ª       ª   ª           human_callback_workflow.ts
+ª   ª   ª       ª   ª           k8s_machine_workflow.ts
+ª   ª   ª       ª   ª           token_cache.ts
+ª   ª   ª       ª   ª           token_machine_workflow.ts
+ª   ª   ª       ª   ª           
+ª   ª   ª       ª   +---handshake
+ª   ª   ª       ª   ª       client_metadata.ts
+ª   ª   ª       ª   ª       
+ª   ª   ª       ª   +---wire_protocol
+ª   ª   ª       ª       ª   compression.ts
+ª   ª   ª       ª       ª   constants.ts
+ª   ª   ª       ª       ª   on_data.ts
+ª   ª   ª       ª       ª   responses.ts
+ª   ª   ª       ª       ª   shared.ts
+ª   ª   ª       ª       ª   
+ª   ª   ª       ª       +---on_demand
+ª   ª   ª       ª               document.ts
+ª   ª   ª       ª               
+ª   ª   ª       +---cursor
+ª   ª   ª       ª       abstract_cursor.ts
+ª   ª   ª       ª       aggregation_cursor.ts
+ª   ª   ª       ª       change_stream_cursor.ts
+ª   ª   ª       ª       client_bulk_write_cursor.ts
+ª   ª   ª       ª       explainable_cursor.ts
+ª   ª   ª       ª       find_cursor.ts
+ª   ª   ª       ª       list_collections_cursor.ts
+ª   ª   ª       ª       list_indexes_cursor.ts
+ª   ª   ª       ª       list_search_indexes_cursor.ts
+ª   ª   ª       ª       run_command_cursor.ts
+ª   ª   ª       ª       
+ª   ª   ª       +---gridfs
+ª   ª   ª       ª       download.ts
+ª   ª   ª       ª       index.ts
+ª   ª   ª       ª       upload.ts
+ª   ª   ª       ª       
+ª   ª   ª       +---operations
+ª   ª   ª       ª   ª   aggregate.ts
+ª   ª   ª       ª   ª   command.ts
+ª   ª   ª       ª   ª   count.ts
+ª   ª   ª       ª   ª   create_collection.ts
+ª   ª   ª       ª   ª   delete.ts
+ª   ª   ª       ª   ª   distinct.ts
+ª   ª   ª       ª   ª   drop.ts
+ª   ª   ª       ª   ª   estimated_document_count.ts
+ª   ª   ª       ª   ª   execute_operation.ts
+ª   ª   ª       ª   ª   find.ts
+ª   ª   ª       ª   ª   find_and_modify.ts
+ª   ª   ª       ª   ª   get_more.ts
+ª   ª   ª       ª   ª   indexes.ts
+ª   ª   ª       ª   ª   insert.ts
+ª   ª   ª       ª   ª   kill_cursors.ts
+ª   ª   ª       ª   ª   list_collections.ts
+ª   ª   ª       ª   ª   list_databases.ts
+ª   ª   ª       ª   ª   operation.ts
+ª   ª   ª       ª   ª   profiling_level.ts
+ª   ª   ª       ª   ª   remove_user.ts
+ª   ª   ª       ª   ª   rename.ts
+ª   ª   ª       ª   ª   run_command.ts
+ª   ª   ª       ª   ª   set_profiling_level.ts
+ª   ª   ª       ª   ª   stats.ts
+ª   ª   ª       ª   ª   update.ts
+ª   ª   ª       ª   ª   validate_collection.ts
+ª   ª   ª       ª   ª   
+ª   ª   ª       ª   +---client_bulk_write
+ª   ª   ª       ª   ª       client_bulk_write.ts
+ª   ª   ª       ª   ª       command_builder.ts
+ª   ª   ª       ª   ª       common.ts
+ª   ª   ª       ª   ª       executor.ts
+ª   ª   ª       ª   ª       results_merger.ts
+ª   ª   ª       ª   ª       
+ª   ª   ª       ª   +---search_indexes
+ª   ª   ª       ª           create.ts
+ª   ª   ª       ª           drop.ts
+ª   ª   ª       ª           update.ts
+ª   ª   ª       ª           
+ª   ª   ª       +---sdam
+ª   ª   ª               common.ts
+ª   ª   ª               events.ts
+ª   ª   ª               monitor.ts
+ª   ª   ª               server.ts
+ª   ª   ª               server_description.ts
+ª   ª   ª               server_selection.ts
+ª   ª   ª               server_selection_events.ts
+ª   ª   ª               srv_polling.ts
+ª   ª   ª               topology.ts
+ª   ª   ª               topology_description.ts
+ª   ª   ª               
+ª   ª   +---mongodb-connection-string-url
+ª   ª   ª   ª   .esm-wrapper.mjs
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   
+ª   ª   ª   +---lib
+ª   ª   ª           index.d.ts
+ª   ª   ª           index.js
+ª   ª   ª           index.js.map
+ª   ª   ª           redact.d.ts
+ª   ª   ª           redact.js
+ª   ª   ª           redact.js.map
+ª   ª   ª           
+ª   ª   +---mongoose
+ª   ª   ª   ª   browser.js
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE.md
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   SECURITY.md
+ª   ª   ª   ª   
+ª   ª   ª   +---dist
+ª   ª   ª   ª       browser.umd.js
+ª   ª   ª   ª       
+ª   ª   ª   +---lib
+ª   ª   ª   ª   ª   aggregate.js
+ª   ª   ª   ª   ª   browser.js
+ª   ª   ª   ª   ª   browserDocument.js
+ª   ª   ª   ª   ª   cast.js
+ª   ª   ª   ª   ª   collection.js
+ª   ª   ª   ª   ª   connection.js
+ª   ª   ª   ª   ª   connectionState.js
+ª   ª   ª   ª   ª   constants.js
+ª   ª   ª   ª   ª   document.js
+ª   ª   ª   ª   ª   documentProvider.js
+ª   ª   ª   ª   ª   driver.js
+ª   ª   ª   ª   ª   index.js
+ª   ª   ª   ª   ª   internal.js
+ª   ª   ª   ª   ª   model.js
+ª   ª   ª   ª   ª   modifiedPathsSnapshot.js
+ª   ª   ª   ª   ª   mongoose.js
+ª   ª   ª   ª   ª   options.js
+ª   ª   ª   ª   ª   query.js
+ª   ª   ª   ª   ª   queryHelpers.js
+ª   ª   ª   ª   ª   schema.js
+ª   ª   ª   ª   ª   schemaType.js
+ª   ª   ª   ª   ª   stateMachine.js
+ª   ª   ª   ª   ª   utils.js
+ª   ª   ª   ª   ª   validOptions.js
+ª   ª   ª   ª   ª   virtualType.js
+ª   ª   ª   ª   ª   
+ª   ª   ª   ª   +---cast
+ª   ª   ª   ª   ª       bigint.js
+ª   ª   ª   ª   ª       boolean.js
+ª   ª   ª   ª   ª       date.js
+ª   ª   ª   ª   ª       decimal128.js
+ª   ª   ª   ª   ª       double.js
+ª   ª   ª   ª   ª       int32.js
+ª   ª   ª   ª   ª       number.js
+ª   ª   ª   ª   ª       objectid.js
+ª   ª   ª   ª   ª       string.js
+ª   ª   ª   ª   ª       uuid.js
+ª   ª   ª   ª   ª       
+ª   ª   ª   ª   +---cursor
+ª   ª   ª   ª   ª       aggregationCursor.js
+ª   ª   ª   ª   ª       changeStream.js
+ª   ª   ª   ª   ª       queryCursor.js
+ª   ª   ª   ª   ª       
+ª   ª   ª   ª   +---drivers
+ª   ª   ª   ª   ª   ª   SPEC.md
+ª   ª   ª   ª   ª   ª   
+ª   ª   ª   ª   ª   +---browser
+ª   ª   ª   ª   ª   ª       binary.js
+ª   ª   ª   ª   ª   ª       decimal128.js
+ª   ª   ª   ª   ª   ª       index.js
+ª   ª   ª   ª   ª   ª       objectid.js
+ª   ª   ª   ª   ª   ª       
+ª   ª   ª   ª   ª   +---node-mongodb-native
+ª   ª   ª   ª   ª           bulkWriteResult.js
+ª   ª   ª   ª   ª           collection.js
+ª   ª   ª   ª   ª           connection.js
+ª   ª   ª   ª   ª           index.js
+ª   ª   ª   ª   ª           
+ª   ª   ª   ª   +---error
+ª   ª   ª   ª   ª       browserMissingSchema.js
+ª   ª   ª   ª   ª       bulkSaveIncompleteError.js
+ª   ª   ª   ª   ª       bulkWriteError.js
+ª   ª   ª   ª   ª       cast.js
+ª   ª   ª   ª   ª       createCollectionsError.js
+ª   ª   ª   ª   ª       divergentArray.js
+ª   ª   ª   ª   ª       eachAsyncMultiError.js
+ª   ª   ª   ª   ª       index.js
+ª   ª   ª   ª   ª       invalidSchemaOption.js
+ª   ª   ª   ª   ª       messages.js
+ª   ª   ª   ª   ª       missingSchema.js
+ª   ª   ª   ª   ª       mongooseError.js
+ª   ª   ª   ª   ª       notFound.js
+ª   ª   ª   ª   ª       objectExpected.js
+ª   ª   ª   ª   ª       objectParameter.js
+ª   ª   ª   ª   ª       overwriteModel.js
+ª   ª   ª   ª   ª       parallelSave.js
+ª   ª   ª   ª   ª       parallelValidate.js
+ª   ª   ª   ª   ª       serverSelection.js
+ª   ª   ª   ª   ª       setOptionError.js
+ª   ª   ª   ª   ª       strict.js
+ª   ª   ª   ª   ª       strictPopulate.js
+ª   ª   ª   ª   ª       syncIndexes.js
+ª   ª   ª   ª   ª       validation.js
+ª   ª   ª   ª   ª       validator.js
+ª   ª   ª   ª   ª       version.js
+ª   ª   ª   ª   ª       
+ª   ª   ª   ª   +---helpers
+ª   ª   ª   ª   ª   ª   arrayDepth.js
+ª   ª   ª   ª   ª   ª   clone.js
+ª   ª   ª   ª   ª   ª   common.js
+ª   ª   ª   ª   ª   ª   createJSONSchemaTypeDefinition.js
+ª   ª   ª   ª   ª   ª   each.js
+ª   ª   ª   ª   ª   ª   firstKey.js
+ª   ª   ª   ª   ª   ª   get.js
+ª   ª   ª   ª   ª   ª   getConstructorName.js
+ª   ª   ª   ª   ª   ª   getDefaultBulkwriteResult.js
+ª   ª   ª   ª   ª   ª   getFunctionName.js
+ª   ª   ª   ª   ª   ª   immediate.js
+ª   ª   ª   ª   ª   ª   isAsyncFunction.js
+ª   ª   ª   ª   ª   ª   isBsonType.js
+ª   ª   ª   ª   ª   ª   isMongooseObject.js
+ª   ª   ª   ª   ª   ª   isObject.js
+ª   ª   ª   ª   ª   ª   isPOJO.js
+ª   ª   ª   ª   ª   ª   isPromise.js
+ª   ª   ª   ª   ª   ª   isSimpleValidator.js
+ª   ª   ª   ª   ª   ª   minimize.js
+ª   ª   ª   ª   ª   ª   omitUndefined.js
+ª   ª   ª   ª   ª   ª   once.js
+ª   ª   ª   ª   ª   ª   parallelLimit.js
+ª   ª   ª   ª   ª   ª   pluralize.js
+ª   ª   ª   ª   ª   ª   printJestWarning.js
+ª   ª   ª   ª   ª   ª   processConnectionOptions.js
+ª   ª   ª   ª   ª   ª   promiseOrCallback.js
+ª   ª   ª   ª   ª   ª   setDefaultsOnInsert.js
+ª   ª   ª   ª   ª   ª   specialProperties.js
+ª   ª   ª   ª   ª   ª   symbols.js
+ª   ª   ª   ª   ª   ª   timers.js
+ª   ª   ª   ª   ª   ª   updateValidators.js
+ª   ª   ª   ª   ª   ª   
+ª   ª   ª   ª   ª   +---aggregate
+ª   ª   ª   ª   ª   ª       prepareDiscriminatorPipeline.js
+ª   ª   ª   ª   ª   ª       stringifyFunctionOperators.js
+ª   ª   ª   ª   ª   ª       
+ª   ª   ª   ª   ª   +---cursor
+ª   ª   ª   ª   ª   ª       eachAsync.js
+ª   ª   ª   ª   ª   ª       
+ª   ª   ª   ª   ª   +---discriminator
+ª   ª   ª   ª   ª   ª       applyEmbeddedDiscriminators.js
+ª   ª   ª   ª   ª   ª       areDiscriminatorValuesEqual.js
+ª   ª   ª   ª   ª   ª       checkEmbeddedDiscriminatorKeyProjection.js
+ª   ª   ª   ª   ª   ª       getConstructor.js
+ª   ª   ª   ª   ª   ª       getDiscriminatorByValue.js
+ª   ª   ª   ª   ª   ª       getSchemaDiscriminatorByValue.js
+ª   ª   ª   ª   ª   ª       mergeDiscriminatorSchema.js
+ª   ª   ª   ª   ª   ª       
+ª   ª   ª   ª   ª   +---document
+ª   ª   ª   ª   ª   ª       applyDefaults.js
+ª   ª   ª   ª   ª   ª       applyTimestamps.js
+ª   ª   ª   ª   ª   ª       applyVirtuals.js
+ª   ª   ª   ª   ª   ª       cleanModifiedSubpaths.js
+ª   ª   ª   ª   ª   ª       compile.js
+ª   ª   ª   ª   ª   ª       getDeepestSubdocumentForPath.js
+ª   ª   ª   ª   ª   ª       getEmbeddedDiscriminatorPath.js
+ª   ª   ª   ª   ª   ª       handleSpreadDoc.js
+ª   ª   ª   ª   ª   ª       
+ª   ª   ª   ª   ª   +---error
+ª   ª   ª   ª   ª   ª       combinePathErrors.js
+ª   ª   ª   ª   ª   ª       
+ª   ª   ª   ª   ª   +---indexes
+ª   ª   ª   ª   ª   ª       applySchemaCollation.js
+ª   ª   ª   ª   ª   ª       decorateDiscriminatorIndexOptions.js
+ª   ª   ª   ª   ª   ª       getRelatedIndexes.js
+ª   ª   ª   ª   ª   ª       isDefaultIdIndex.js
+ª   ª   ª   ª   ª   ª       isIndexEqual.js
+ª   ª   ª   ª   ª   ª       isIndexSpecEqual.js
+ª   ª   ª   ª   ª   ª       isTextIndex.js
+ª   ª   ª   ª   ª   ª       isTimeseriesIndex.js
+ª   ª   ª   ª   ª   ª       
+ª   ª   ª   ª   ª   +---model
+ª   ª   ª   ª   ª   ª       applyDefaultsToPOJO.js
+ª   ª   ª   ª   ª   ª       applyHooks.js
+ª   ª   ª   ª   ª   ª       applyMethods.js
+ª   ª   ª   ª   ª   ª       applyStaticHooks.js
+ª   ª   ª   ª   ª   ª       applyStatics.js
+ª   ª   ª   ª   ª   ª       castBulkWrite.js
+ª   ª   ª   ª   ª   ª       decorateBulkWriteResult.js
+ª   ª   ª   ª   ª   ª       discriminator.js
+ª   ª   ª   ª   ª   ª       pushNestedArrayPaths.js
+ª   ª   ª   ª   ª   ª       
+ª   ª   ª   ª   ª   +---path
+ª   ª   ª   ª   ª   ª       parentPaths.js
+ª   ª   ª   ª   ª   ª       setDottedPath.js
+ª   ª   ª   ª   ª   ª       
+ª   ª   ª   ª   ª   +---populate
+ª   ª   ª   ª   ª   ª       assignRawDocsToIdStructure.js
+ª   ª   ª   ª   ª   ª       assignVals.js
+ª   ª   ª   ª   ª   ª       createPopulateQueryFilter.js
+ª   ª   ª   ª   ª   ª       getModelsMapForPopulate.js
+ª   ª   ª   ª   ª   ª       getSchemaTypes.js
+ª   ª   ª   ª   ª   ª       getVirtual.js
+ª   ª   ª   ª   ª   ª       leanPopulateMap.js
+ª   ª   ª   ª   ª   ª       lookupLocalFields.js
+ª   ª   ª   ª   ª   ª       markArraySubdocsPopulated.js
+ª   ª   ª   ª   ª   ª       modelNamesFromRefPath.js
+ª   ª   ª   ª   ª   ª       removeDeselectedForeignField.js
+ª   ª   ª   ª   ª   ª       setPopulatedVirtualValue.js
+ª   ª   ª   ª   ª   ª       skipPopulateValue.js
+ª   ª   ª   ª   ª   ª       validateRef.js
+ª   ª   ª   ª   ª   ª       
+ª   ª   ª   ª   ª   +---projection
+ª   ª   ª   ª   ª   ª       applyProjection.js
+ª   ª   ª   ª   ª   ª       hasIncludedChildren.js
+ª   ª   ª   ª   ª   ª       isDefiningProjection.js
+ª   ª   ª   ª   ª   ª       isExclusive.js
+ª   ª   ª   ª   ª   ª       isInclusive.js
+ª   ª   ª   ª   ª   ª       isNestedProjection.js
+ª   ª   ª   ª   ª   ª       isPathExcluded.js
+ª   ª   ª   ª   ª   ª       isPathSelectedInclusive.js
+ª   ª   ª   ª   ª   ª       isSubpath.js
+ª   ª   ª   ª   ª   ª       parseProjection.js
+ª   ª   ª   ª   ª   ª       
+ª   ª   ª   ª   ª   +---query
+ª   ª   ª   ª   ª   ª       applyGlobalOption.js
+ª   ª   ª   ª   ª   ª       cast$expr.js
+ª   ª   ª   ª   ª   ª       castFilterPath.js
+ª   ª   ª   ª   ª   ª       castUpdate.js
+ª   ª   ª   ª   ª   ª       getEmbeddedDiscriminatorPath.js
+ª   ª   ª   ª   ª   ª       handleImmutable.js
+ª   ª   ª   ª   ª   ª       handleReadPreferenceAliases.js
+ª   ª   ª   ª   ª   ª       hasDollarKeys.js
+ª   ª   ª   ª   ª   ª       isOperator.js
+ª   ª   ª   ª   ª   ª       sanitizeFilter.js
+ª   ª   ª   ª   ª   ª       sanitizeProjection.js
+ª   ª   ª   ª   ª   ª       selectPopulatedFields.js
+ª   ª   ª   ª   ª   ª       trusted.js
+ª   ª   ª   ª   ª   ª       validOps.js
+ª   ª   ª   ª   ª   ª       
+ª   ª   ª   ª   ª   +---schema
+ª   ª   ª   ª   ª   ª       addAutoId.js
+ª   ª   ª   ª   ª   ª       applyBuiltinPlugins.js
+ª   ª   ª   ª   ª   ª       applyPlugins.js
+ª   ª   ª   ª   ª   ª       applyReadConcern.js
+ª   ª   ª   ª   ª   ª       applyWriteConcern.js
+ª   ª   ª   ª   ª   ª       cleanPositionalOperators.js
+ª   ª   ª   ª   ª   ª       getIndexes.js
+ª   ª   ª   ª   ª   ª       getKeysInSchemaOrder.js
+ª   ª   ª   ª   ª   ª       getPath.js
+ª   ª   ª   ª   ª   ª       getSubdocumentStrictValue.js
+ª   ª   ª   ª   ª   ª       handleIdOption.js
+ª   ª   ª   ª   ª   ª       handleTimestampOption.js
+ª   ª   ª   ª   ª   ª       idGetter.js
+ª   ª   ª   ª   ª   ª       merge.js
+ª   ª   ª   ª   ª   ª       
+ª   ª   ª   ª   ª   +---schematype
+ª   ª   ª   ª   ª   ª       handleImmutable.js
+ª   ª   ª   ª   ª   ª       
+ª   ª   ª   ª   ª   +---timestamps
+ª   ª   ª   ª   ª   ª       setDocumentTimestamps.js
+ª   ª   ª   ª   ª   ª       setupTimestamps.js
+ª   ª   ª   ª   ª   ª       
+ª   ª   ª   ª   ª   +---topology
+ª   ª   ª   ª   ª   ª       allServersUnknown.js
+ª   ª   ª   ª   ª   ª       isAtlas.js
+ª   ª   ª   ª   ª   ª       isSSLError.js
+ª   ª   ª   ª   ª   ª       
+ª   ª   ª   ª   ª   +---update
+ª   ª   ª   ª   ª           applyTimestampsToChildren.js
+ª   ª   ª   ª   ª           applyTimestampsToUpdate.js
+ª   ª   ª   ª   ª           castArrayFilters.js
+ª   ª   ª   ª   ª           decorateUpdateWithVersionKey.js
+ª   ª   ª   ª   ª           modifiedPaths.js
+ª   ª   ª   ª   ª           moveImmutableProperties.js
+ª   ª   ª   ª   ª           removeUnusedArrayFilters.js
+ª   ª   ª   ª   ª           updatedPathsByArrayFilter.js
+ª   ª   ª   ª   ª           
+ª   ª   ª   ª   +---options
+ª   ª   ª   ª   ª       populateOptions.js
+ª   ª   ª   ª   ª       propertyOptions.js
+ª   ª   ª   ª   ª       saveOptions.js
+ª   ª   ª   ª   ª       schemaArrayOptions.js
+ª   ª   ª   ª   ª       schemaBufferOptions.js
+ª   ª   ª   ª   ª       schemaDateOptions.js
+ª   ª   ª   ª   ª       schemaDocumentArrayOptions.js
+ª   ª   ª   ª   ª       schemaMapOptions.js
+ª   ª   ª   ª   ª       schemaNumberOptions.js
+ª   ª   ª   ª   ª       schemaObjectIdOptions.js
+ª   ª   ª   ª   ª       schemaStringOptions.js
+ª   ª   ª   ª   ª       schemaSubdocumentOptions.js
+ª   ª   ª   ª   ª       schemaTypeOptions.js
+ª   ª   ª   ª   ª       schemaUnionOptions.js
+ª   ª   ª   ª   ª       virtualOptions.js
+ª   ª   ª   ª   ª       
+ª   ª   ª   ª   +---plugins
+ª   ª   ª   ª   ª       index.js
+ª   ª   ª   ª   ª       saveSubdocs.js
+ª   ª   ª   ª   ª       sharding.js
+ª   ª   ª   ª   ª       trackTransaction.js
+ª   ª   ª   ª   ª       validateBeforeSave.js
+ª   ª   ª   ª   ª       
+ª   ª   ª   ª   +---schema
+ª   ª   ª   ª   ª   ª   array.js
+ª   ª   ª   ª   ª   ª   bigint.js
+ª   ª   ª   ª   ª   ª   boolean.js
+ª   ª   ª   ª   ª   ª   buffer.js
+ª   ª   ª   ª   ª   ª   date.js
+ª   ª   ª   ª   ª   ª   decimal128.js
+ª   ª   ª   ª   ª   ª   documentArray.js
+ª   ª   ª   ª   ª   ª   documentArrayElement.js
+ª   ª   ª   ª   ª   ª   double.js
+ª   ª   ª   ª   ª   ª   index.js
+ª   ª   ª   ª   ª   ª   int32.js
+ª   ª   ª   ª   ª   ª   map.js
+ª   ª   ª   ª   ª   ª   mixed.js
+ª   ª   ª   ª   ª   ª   number.js
+ª   ª   ª   ª   ª   ª   objectId.js
+ª   ª   ª   ª   ª   ª   string.js
+ª   ª   ª   ª   ª   ª   subdocument.js
+ª   ª   ª   ª   ª   ª   symbols.js
+ª   ª   ª   ª   ª   ª   union.js
+ª   ª   ª   ª   ª   ª   uuid.js
+ª   ª   ª   ª   ª   ª   
+ª   ª   ª   ª   ª   +---operators
+ª   ª   ª   ª   ª           bitwise.js
+ª   ª   ª   ª   ª           exists.js
+ª   ª   ª   ª   ª           geospatial.js
+ª   ª   ª   ª   ª           helpers.js
+ª   ª   ª   ª   ª           text.js
+ª   ª   ª   ª   ª           type.js
+ª   ª   ª   ª   ª           
+ª   ª   ª   ª   +---types
+ª   ª   ª   ª       ª   arraySubdocument.js
+ª   ª   ª   ª       ª   buffer.js
+ª   ª   ª   ª       ª   decimal128.js
+ª   ª   ª   ª       ª   double.js
+ª   ª   ª   ª       ª   index.js
+ª   ª   ª   ª       ª   map.js
+ª   ª   ª   ª       ª   objectid.js
+ª   ª   ª   ª       ª   subdocument.js
+ª   ª   ª   ª       ª   uuid.js
+ª   ª   ª   ª       ª   
+ª   ª   ª   ª       +---array
+ª   ª   ª   ª       ª   ª   index.js
+ª   ª   ª   ª       ª   ª   isMongooseArray.js
+ª   ª   ª   ª       ª   ª   
+ª   ª   ª   ª       ª   +---methods
+ª   ª   ª   ª       ª           index.js
+ª   ª   ª   ª       ª           
+ª   ª   ª   ª       +---documentArray
+ª   ª   ª   ª           ª   index.js
+ª   ª   ª   ª           ª   isMongooseDocumentArray.js
+ª   ª   ª   ª           ª   
+ª   ª   ª   ª           +---methods
+ª   ª   ª   ª                   index.js
+ª   ª   ª   ª                   
+ª   ª   ª   +---types
+ª   ª   ª           aggregate.d.ts
+ª   ª   ª           augmentations.d.ts
+ª   ª   ª           callback.d.ts
+ª   ª   ª           collection.d.ts
+ª   ª   ª           connection.d.ts
+ª   ª   ª           cursor.d.ts
+ª   ª   ª           document.d.ts
+ª   ª   ª           error.d.ts
+ª   ª   ª           expressions.d.ts
+ª   ª   ª           helpers.d.ts
+ª   ª   ª           index.d.ts
+ª   ª   ª           indexes.d.ts
+ª   ª   ª           inferrawdoctype.d.ts
+ª   ª   ª           inferschematype.d.ts
+ª   ª   ª           middlewares.d.ts
+ª   ª   ª           models.d.ts
+ª   ª   ª           mongooseoptions.d.ts
+ª   ª   ª           pipelinestage.d.ts
+ª   ª   ª           populate.d.ts
+ª   ª   ª           query.d.ts
+ª   ª   ª           schemaoptions.d.ts
+ª   ª   ª           schematypes.d.ts
+ª   ª   ª           session.d.ts
+ª   ª   ª           types.d.ts
+ª   ª   ª           utility.d.ts
+ª   ª   ª           validation.d.ts
+ª   ª   ª           virtuals.d.ts
+ª   ª   ª           
+ª   ª   +---mpath
+ª   ª   ª   ª   .travis.yml
+ª   ª   ª   ª   History.md
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   SECURITY.md
+ª   ª   ª   ª   
+ª   ª   ª   +---lib
+ª   ª   ª   ª       index.js
+ª   ª   ª   ª       stringToParts.js
+ª   ª   ª   ª       
+ª   ª   ª   +---test
+ª   ª   ª           .eslintrc.yml
+ª   ª   ª           index.js
+ª   ª   ª           stringToParts.js
+ª   ª   ª           
+ª   ª   +---mquery
+ª   ª   ª   ª   History.md
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   SECURITY.md
+ª   ª   ª   ª   
+ª   ª   ª   +---.github
+ª   ª   ª   ª       ISSUE_TEMPLATE.md
+ª   ª   ª   ª       PULL_REQUEST_TEMPLATE.md
+ª   ª   ª   ª       
+ª   ª   ª   +---lib
+ª   ª   ª       ª   env.js
+ª   ª   ª       ª   mquery.js
+ª   ª   ª       ª   permissions.js
+ª   ª   ª       ª   utils.js
+ª   ª   ª       ª   
+ª   ª   ª       +---collection
+ª   ª   ª               collection.js
+ª   ª   ª               index.js
+ª   ª   ª               node.js
+ª   ª   ª               
+ª   ª   +---ms
+ª   ª   ª       index.js
+ª   ª   ª       license.md
+ª   ª   ª       package.json
+ª   ª   ª       readme.md
+ª   ª   ª       
+ª   ª   +---negotiator
+ª   ª   ª   ª   HISTORY.md
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   
+ª   ª   ª   +---lib
+ª   ª   ª           charset.js
+ª   ª   ª           encoding.js
+ª   ª   ª           language.js
+ª   ª   ª           mediaType.js
+ª   ª   ª           
+ª   ª   +---object-assign
+ª   ª   ª       index.js
+ª   ª   ª       license
+ª   ª   ª       package.json
+ª   ª   ª       readme.md
+ª   ª   ª       
+ª   ª   +---object-inspect
+ª   ª   ª   ª   .eslintrc
+ª   ª   ª   ª   .nycrc
+ª   ª   ª   ª   CHANGELOG.md
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package-support.json
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   readme.markdown
+ª   ª   ª   ª   test-core-js.js
+ª   ª   ª   ª   util.inspect.js
+ª   ª   ª   ª   
+ª   ª   ª   +---.github
+ª   ª   ª   ª       FUNDING.yml
+ª   ª   ª   ª       
+ª   ª   ª   +---example
+ª   ª   ª   ª       all.js
+ª   ª   ª   ª       circular.js
+ª   ª   ª   ª       fn.js
+ª   ª   ª   ª       inspect.js
+ª   ª   ª   ª       
+ª   ª   ª   +---test
+ª   ª   ª       ª   bigint.js
+ª   ª   ª       ª   circular.js
+ª   ª   ª       ª   deep.js
+ª   ª   ª       ª   element.js
+ª   ª   ª       ª   err.js
+ª   ª   ª       ª   fakes.js
+ª   ª   ª       ª   fn.js
+ª   ª   ª       ª   global.js
+ª   ª   ª       ª   has.js
+ª   ª   ª       ª   holes.js
+ª   ª   ª       ª   indent-option.js
+ª   ª   ª       ª   inspect.js
+ª   ª   ª       ª   lowbyte.js
+ª   ª   ª       ª   number.js
+ª   ª   ª       ª   quoteStyle.js
+ª   ª   ª       ª   toStringTag.js
+ª   ª   ª       ª   undef.js
+ª   ª   ª       ª   values.js
+ª   ª   ª       ª   
+ª   ª   ª       +---browser
+ª   ª   ª               dom.js
+ª   ª   ª               
+ª   ª   +---on-finished
+ª   ª   ª       HISTORY.md
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---once
+ª   ª   ª       LICENSE
+ª   ª   ª       once.js
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---parseurl
+ª   ª   ª       HISTORY.md
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---path-to-regexp
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   Readme.md
+ª   ª   ª   ª   
+ª   ª   ª   +---dist
+ª   ª   ª           index.d.ts
+ª   ª   ª           index.js
+ª   ª   ª           index.js.map
+ª   ª   ª           
+ª   ª   +---proxy-addr
+ª   ª   ª       HISTORY.md
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---punycode
+ª   ª   ª       LICENSE-MIT.txt
+ª   ª   ª       package.json
+ª   ª   ª       punycode.es6.js
+ª   ª   ª       punycode.js
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---qs
+ª   ª   ª   ª   .editorconfig
+ª   ª   ª   ª   .eslintrc
+ª   ª   ª   ª   .nycrc
+ª   ª   ª   ª   CHANGELOG.md
+ª   ª   ª   ª   LICENSE.md
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   
+ª   ª   ª   +---.github
+ª   ª   ª   ª       FUNDING.yml
+ª   ª   ª   ª       
+ª   ª   ª   +---dist
+ª   ª   ª   ª       qs.js
+ª   ª   ª   ª       
+ª   ª   ª   +---lib
+ª   ª   ª   ª       formats.js
+ª   ª   ª   ª       index.js
+ª   ª   ª   ª       parse.js
+ª   ª   ª   ª       stringify.js
+ª   ª   ª   ª       utils.js
+ª   ª   ª   ª       
+ª   ª   ª   +---test
+ª   ª   ª           empty-keys-cases.js
+ª   ª   ª           parse.js
+ª   ª   ª           stringify.js
+ª   ª   ª           utils.js
+ª   ª   ª           
+ª   ª   +---range-parser
+ª   ª   ª       HISTORY.md
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---raw-body
+ª   ª   ª   ª   HISTORY.md
+ª   ª   ª   ª   index.d.ts
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   SECURITY.md
+ª   ª   ª   ª   
+ª   ª   ª   +---node_modules
+ª   ª   ª       +---iconv-lite
+ª   ª   ª           ª   Changelog.md
+ª   ª   ª           ª   LICENSE
+ª   ª   ª           ª   package.json
+ª   ª   ª           ª   README.md
+ª   ª   ª           ª   
+ª   ª   ª           +---encodings
+ª   ª   ª           ª   ª   dbcs-codec.js
+ª   ª   ª           ª   ª   dbcs-data.js
+ª   ª   ª           ª   ª   index.js
+ª   ª   ª           ª   ª   internal.js
+ª   ª   ª           ª   ª   sbcs-codec.js
+ª   ª   ª           ª   ª   sbcs-data-generated.js
+ª   ª   ª           ª   ª   sbcs-data.js
+ª   ª   ª           ª   ª   utf16.js
+ª   ª   ª           ª   ª   utf32.js
+ª   ª   ª           ª   ª   utf7.js
+ª   ª   ª           ª   ª   
+ª   ª   ª           ª   +---tables
+ª   ª   ª           ª           big5-added.json
+ª   ª   ª           ª           cp936.json
+ª   ª   ª           ª           cp949.json
+ª   ª   ª           ª           cp950.json
+ª   ª   ª           ª           eucjp.json
+ª   ª   ª           ª           gb18030-ranges.json
+ª   ª   ª           ª           gbk-added.json
+ª   ª   ª           ª           shiftjis.json
+ª   ª   ª           ª           
+ª   ª   ª           +---lib
+ª   ª   ª               ª   bom-handling.js
+ª   ª   ª               ª   index.d.ts
+ª   ª   ª               ª   index.js
+ª   ª   ª               ª   streams.js
+ª   ª   ª               ª   
+ª   ª   ª               +---helpers
+ª   ª   ª                       merge-exports.js
+ª   ª   ª                       
+ª   ª   +---router
+ª   ª   ª   ª   HISTORY.md
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   
+ª   ª   ª   +---lib
+ª   ª   ª           layer.js
+ª   ª   ª           route.js
+ª   ª   ª           
+ª   ª   +---safer-buffer
+ª   ª   ª       dangerous.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       Porting-Buffer.md
+ª   ª   ª       Readme.md
+ª   ª   ª       safer.js
+ª   ª   ª       tests.js
+ª   ª   ª       
+ª   ª   +---send
+ª   ª   ª       HISTORY.md
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---serve-static
+ª   ª   ª       HISTORY.md
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---setprototypeof
+ª   ª   ª   ª   index.d.ts
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   
+ª   ª   ª   +---test
+ª   ª   ª           index.js
+ª   ª   ª           
+ª   ª   +---side-channel
+ª   ª   ª   ª   .editorconfig
+ª   ª   ª   ª   .eslintrc
+ª   ª   ª   ª   .nycrc
+ª   ª   ª   ª   CHANGELOG.md
+ª   ª   ª   ª   index.d.ts
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   tsconfig.json
+ª   ª   ª   ª   
+ª   ª   ª   +---.github
+ª   ª   ª   ª       FUNDING.yml
+ª   ª   ª   ª       
+ª   ª   ª   +---test
+ª   ª   ª           index.js
+ª   ª   ª           
+ª   ª   +---side-channel-list
+ª   ª   ª   ª   .editorconfig
+ª   ª   ª   ª   .eslintrc
+ª   ª   ª   ª   .nycrc
+ª   ª   ª   ª   CHANGELOG.md
+ª   ª   ª   ª   index.d.ts
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   list.d.ts
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   tsconfig.json
+ª   ª   ª   ª   
+ª   ª   ª   +---.github
+ª   ª   ª   ª       FUNDING.yml
+ª   ª   ª   ª       
+ª   ª   ª   +---test
+ª   ª   ª           index.js
+ª   ª   ª           
+ª   ª   +---side-channel-map
+ª   ª   ª   ª   .editorconfig
+ª   ª   ª   ª   .eslintrc
+ª   ª   ª   ª   .nycrc
+ª   ª   ª   ª   CHANGELOG.md
+ª   ª   ª   ª   index.d.ts
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   tsconfig.json
+ª   ª   ª   ª   
+ª   ª   ª   +---.github
+ª   ª   ª   ª       FUNDING.yml
+ª   ª   ª   ª       
+ª   ª   ª   +---test
+ª   ª   ª           index.js
+ª   ª   ª           
+ª   ª   +---side-channel-weakmap
+ª   ª   ª   ª   .editorconfig
+ª   ª   ª   ª   .eslintrc
+ª   ª   ª   ª   .nycrc
+ª   ª   ª   ª   CHANGELOG.md
+ª   ª   ª   ª   index.d.ts
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   tsconfig.json
+ª   ª   ª   ª   
+ª   ª   ª   +---.github
+ª   ª   ª   ª       FUNDING.yml
+ª   ª   ª   ª       
+ª   ª   ª   +---test
+ª   ª   ª           index.js
+ª   ª   ª           
+ª   ª   +---sift
+ª   ª   ª   ª   index.d.ts
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   MIT-LICENSE.txt
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   sift.csp.min.js
+ª   ª   ª   ª   sift.csp.min.js.map
+ª   ª   ª   ª   sift.min.js
+ª   ª   ª   ª   sift.min.js.map
+ª   ª   ª   ª   
+ª   ª   ª   +---es
+ª   ª   ª   ª       index.js
+ª   ª   ª   ª       index.js.map
+ª   ª   ª   ª       
+ª   ª   ª   +---es5m
+ª   ª   ª   ª       index.js
+ª   ª   ª   ª       index.js.map
+ª   ª   ª   ª       
+ª   ª   ª   +---lib
+ª   ª   ª   ª       core.d.ts
+ª   ª   ª   ª       index.d.ts
+ª   ª   ª   ª       index.js
+ª   ª   ª   ª       index.js.map
+ª   ª   ª   ª       operations.d.ts
+ª   ª   ª   ª       utils.d.ts
+ª   ª   ª   ª       
+ª   ª   ª   +---src
+ª   ª   ª           core.ts
+ª   ª   ª           index.ts
+ª   ª   ª           operations.ts
+ª   ª   ª           utils.ts
+ª   ª   ª           
+ª   ª   +---sparse-bitfield
+ª   ª   ª       .npmignore
+ª   ª   ª       .travis.yml
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       test.js
+ª   ª   ª       
+ª   ª   +---statuses
+ª   ª   ª       codes.json
+ª   ª   ª       HISTORY.md
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---toidentifier
+ª   ª   ª       HISTORY.md
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---tr46
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE.md
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   
+ª   ª   ª   +---lib
+ª   ª   ª           mappingTable.json
+ª   ª   ª           regexes.js
+ª   ª   ª           statusMapping.js
+ª   ª   ª           
+ª   ª   +---type-is
+ª   ª   ª       HISTORY.md
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---unpipe
+ª   ª   ª       HISTORY.md
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---vary
+ª   ª   ª       HISTORY.md
+ª   ª   ª       index.js
+ª   ª   ª       LICENSE
+ª   ª   ª       package.json
+ª   ª   ª       README.md
+ª   ª   ª       
+ª   ª   +---webidl-conversions
+ª   ª   ª   ª   LICENSE.md
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   
+ª   ª   ª   +---lib
+ª   ª   ª           index.js
+ª   ª   ª           
+ª   ª   +---whatwg-url
+ª   ª   ª   ª   index.js
+ª   ª   ª   ª   LICENSE.txt
+ª   ª   ª   ª   package.json
+ª   ª   ª   ª   README.md
+ª   ª   ª   ª   webidl2js-wrapper.js
+ª   ª   ª   ª   
+ª   ª   ª   +---lib
+ª   ª   ª           encoding.js
+ª   ª   ª           Function.js
+ª   ª   ª           infra.js
+ª   ª   ª           percent-encoding.js
+ª   ª   ª           URL-impl.js
+ª   ª   ª           url-state-machine.js
+ª   ª   ª           URL.js
+ª   ª   ª           urlencoded.js
+ª   ª   ª           URLSearchParams-impl.js
+ª   ª   ª           URLSearchParams.js
+ª   ª   ª           utils.js
+ª   ª   ª           VoidFunction.js
+ª   ª   ª           
+ª   ª   +---wrappy
+ª   ª           LICENSE
+ª   ª           package.json
+ª   ª           README.md
+ª   ª           wrappy.js
+ª   ª           
+ª   +---public
+ª       ª   analisis.html
+ª       ª   historico.html
+ª       ª   index.html
+ª       ª   resumen.html
+ª       ª   turno.html
+ª       ª   
+ª       +---css
+ª       ª       style.css
+ª       ª       
+ª       +---images
+ª       ª       logo.png
+ª       ª       
+ª       +---js
+ª       ª       analisis.js
+ª       ª       historico.js
+ª       ª       index.js
+ª       ª       main.js
+ª       ª       operario.js
+ª       ª       resumen.js
+ª       ª       turno.js
+ª       ª       
+ª       +---reportes
+ª               reporte_angel_250.html
+ª               reporte_antonior_243.html
+ª               reporte_antonio_120.html
+ª               reporte_carlos_158.html
+ª               reporte_eloy_40.html
+ª               reporte_franciscog_229.html
+ª               reporte_franciscoj_251.html
+ª               reporte_franciscoq_199.html
+ª               reporte_franciscor_239.html
+ª               reporte_humberto_177.html
+ª               reporte_jonatan_178.html
+ª               reporte_joseg_196.html
+ª               reporte_josep_252.html
+ª               reporte_josue_246.html
+ª               reporte_juancarlos_204.html
+ª               reporte_juanjose_203.html
+ª               reporte_juanmanuel_244.html
+ª               
++---remoto
+    ª   historico.html
+    ª   index - copia.html
+    ª   index.html
+    ª   package-lock.json
+    ª   package.json
+    ª   process.env
+    ª   reporte_base_lideres.html
+    ª   server.js
+    ª   turno.html
+    ª   
+    +---api
+    ª       clear.js
+    ª       reportes.js
+    ª       sendReport.js
+    ª       
+    +---backend
+    ª   ª   index.js
+    ª   ª   server.js
+    ª   ª   
+    ª   +---models
+    ª           activity.js
+    ª           
+    +---node_modules
+    ª   ª   .package-lock.json
+    ª   ª   
+    ª   +---@mongodb-js
+    ª   ª   +---saslprep
+    ª   ª       ª   LICENSE
+    ª   ª       ª   package.json
+    ª   ª       ª   readme.md
+    ª   ª       ª   
+    ª   ª       +---dist
+    ª   ª               .esm-wrapper.mjs
+    ª   ª               browser.d.ts
+    ª   ª               browser.d.ts.map
+    ª   ª               browser.js
+    ª   ª               browser.js.map
+    ª   ª               code-points-data-browser.d.ts
+    ª   ª               code-points-data-browser.d.ts.map
+    ª   ª               code-points-data-browser.js
+    ª   ª               code-points-data-browser.js.map
+    ª   ª               code-points-data.d.ts
+    ª   ª               code-points-data.d.ts.map
+    ª   ª               code-points-data.js
+    ª   ª               code-points-data.js.map
+    ª   ª               code-points-src.d.ts
+    ª   ª               code-points-src.d.ts.map
+    ª   ª               code-points-src.js
+    ª   ª               code-points-src.js.map
+    ª   ª               generate-code-points.d.ts
+    ª   ª               generate-code-points.d.ts.map
+    ª   ª               generate-code-points.js
+    ª   ª               generate-code-points.js.map
+    ª   ª               index.d.ts
+    ª   ª               index.d.ts.map
+    ª   ª               index.js
+    ª   ª               index.js.map
+    ª   ª               memory-code-points.d.ts
+    ª   ª               memory-code-points.d.ts.map
+    ª   ª               memory-code-points.js
+    ª   ª               memory-code-points.js.map
+    ª   ª               node.d.ts
+    ª   ª               node.d.ts.map
+    ª   ª               node.js
+    ª   ª               node.js.map
+    ª   ª               util.d.ts
+    ª   ª               util.d.ts.map
+    ª   ª               util.js
+    ª   ª               util.js.map
+    ª   ª               
+    ª   +---@types
+    ª   ª   +---webidl-conversions
+    ª   ª   ª       index.d.ts
+    ª   ª   ª       LICENSE
+    ª   ª   ª       package.json
+    ª   ª   ª       README.md
+    ª   ª   ª       
+    ª   ª   +---whatwg-url
+    ª   ª       ª   index.d.ts
+    ª   ª       ª   LICENSE
+    ª   ª       ª   package.json
+    ª   ª       ª   README.md
+    ª   ª       ª   webidl2js-wrapper.d.ts
+    ª   ª       ª   
+    ª   ª       +---lib
+    ª   ª               URL-impl.d.ts
+    ª   ª               URL.d.ts
+    ª   ª               URLSearchParams-impl.d.ts
+    ª   ª               URLSearchParams.d.ts
+    ª   ª               
+    ª   +---accepts
+    ª   ª       HISTORY.md
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       
+    ª   +---body-parser
+    ª   ª   ª   HISTORY.md
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   
+    ª   ª   +---lib
+    ª   ª       ª   read.js
+    ª   ª       ª   utils.js
+    ª   ª       ª   
+    ª   ª       +---types
+    ª   ª               json.js
+    ª   ª               raw.js
+    ª   ª               text.js
+    ª   ª               urlencoded.js
+    ª   ª               
+    ª   +---bson
+    ª   ª   ª   bson.d.ts
+    ª   ª   ª   LICENSE.md
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   
+    ª   ª   +---etc
+    ª   ª   ª       prepare.js
+    ª   ª   ª       
+    ª   ª   +---lib
+    ª   ª   ª       bson.bundle.js
+    ª   ª   ª       bson.bundle.js.map
+    ª   ª   ª       bson.cjs
+    ª   ª   ª       bson.cjs.map
+    ª   ª   ª       bson.mjs
+    ª   ª   ª       bson.mjs.map
+    ª   ª   ª       bson.node.mjs
+    ª   ª   ª       bson.node.mjs.map
+    ª   ª   ª       bson.rn.cjs
+    ª   ª   ª       bson.rn.cjs.map
+    ª   ª   ª       
+    ª   ª   +---src
+    ª   ª   ª   ª   binary.ts
+    ª   ª   ª   ª   bson.ts
+    ª   ª   ª   ª   bson_value.ts
+    ª   ª   ª   ª   code.ts
+    ª   ª   ª   ª   constants.ts
+    ª   ª   ª   ª   db_ref.ts
+    ª   ª   ª   ª   decimal128.ts
+    ª   ª   ª   ª   double.ts
+    ª   ª   ª   ª   error.ts
+    ª   ª   ª   ª   extended_json.ts
+    ª   ª   ª   ª   index.ts
+    ª   ª   ª   ª   int_32.ts
+    ª   ª   ª   ª   long.ts
+    ª   ª   ª   ª   max_key.ts
+    ª   ª   ª   ª   min_key.ts
+    ª   ª   ª   ª   objectid.ts
+    ª   ª   ª   ª   parse_utf8.ts
+    ª   ª   ª   ª   regexp.ts
+    ª   ª   ª   ª   symbol.ts
+    ª   ª   ª   ª   timestamp.ts
+    ª   ª   ª   ª   
+    ª   ª   ª   +---parser
+    ª   ª   ª   ª   ª   calculate_size.ts
+    ª   ª   ª   ª   ª   deserializer.ts
+    ª   ª   ª   ª   ª   serializer.ts
+    ª   ª   ª   ª   ª   utils.ts
+    ª   ª   ª   ª   ª   
+    ª   ª   ª   ª   +---on_demand
+    ª   ª   ª   ª           index.ts
+    ª   ª   ª   ª           parse_to_elements.ts
+    ª   ª   ª   ª           
+    ª   ª   ª   +---utils
+    ª   ª   ª           byte_utils.ts
+    ª   ª   ª           latin.ts
+    ª   ª   ª           node_byte_utils.ts
+    ª   ª   ª           number_utils.ts
+    ª   ª   ª           string_utils.ts
+    ª   ª   ª           web_byte_utils.ts
+    ª   ª   ª           
+    ª   ª   +---vendor
+    ª   ª       +---base64
+    ª   ª       ª       base64.js
+    ª   ª       ª       LICENSE-MIT.txt
+    ª   ª       ª       package.json
+    ª   ª       ª       README.md
+    ª   ª       ª       
+    ª   ª       +---text-encoding
+    ª   ª           ª   index.js
+    ª   ª           ª   LICENSE.md
+    ª   ª           ª   package.json
+    ª   ª           ª   README.md
+    ª   ª           ª   
+    ª   ª           +---lib
+    ª   ª                   encoding-indexes.js
+    ª   ª                   encoding.js
+    ª   ª                   
+    ª   +---bytes
+    ª   ª       History.md
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       Readme.md
+    ª   ª       
+    ª   +---call-bind-apply-helpers
+    ª   ª   ª   .eslintrc
+    ª   ª   ª   .nycrc
+    ª   ª   ª   actualApply.d.ts
+    ª   ª   ª   actualApply.js
+    ª   ª   ª   applyBind.d.ts
+    ª   ª   ª   applyBind.js
+    ª   ª   ª   CHANGELOG.md
+    ª   ª   ª   functionApply.d.ts
+    ª   ª   ª   functionApply.js
+    ª   ª   ª   functionCall.d.ts
+    ª   ª   ª   functionCall.js
+    ª   ª   ª   index.d.ts
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   reflectApply.d.ts
+    ª   ª   ª   reflectApply.js
+    ª   ª   ª   tsconfig.json
+    ª   ª   ª   
+    ª   ª   +---.github
+    ª   ª   ª       FUNDING.yml
+    ª   ª   ª       
+    ª   ª   +---test
+    ª   ª           index.js
+    ª   ª           
+    ª   +---call-bound
+    ª   ª   ª   .eslintrc
+    ª   ª   ª   .nycrc
+    ª   ª   ª   CHANGELOG.md
+    ª   ª   ª   index.d.ts
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   tsconfig.json
+    ª   ª   ª   
+    ª   ª   +---.github
+    ª   ª   ª       FUNDING.yml
+    ª   ª   ª       
+    ª   ª   +---test
+    ª   ª           index.js
+    ª   ª           
+    ª   +---content-disposition
+    ª   ª       HISTORY.md
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       
+    ª   +---content-type
+    ª   ª       HISTORY.md
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       
+    ª   +---cookie
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       SECURITY.md
+    ª   ª       
+    ª   +---cookie-signature
+    ª   ª       History.md
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       Readme.md
+    ª   ª       
+    ª   +---cors
+    ª   ª   ª   CONTRIBUTING.md
+    ª   ª   ª   HISTORY.md
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   
+    ª   ª   +---lib
+    ª   ª           index.js
+    ª   ª           
+    ª   +---debug
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   
+    ª   ª   +---src
+    ª   ª           browser.js
+    ª   ª           common.js
+    ª   ª           index.js
+    ª   ª           node.js
+    ª   ª           
+    ª   +---depd
+    ª   ª   ª   History.md
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   Readme.md
+    ª   ª   ª   
+    ª   ª   +---lib
+    ª   ª       +---browser
+    ª   ª               index.js
+    ª   ª               
+    ª   +---dunder-proto
+    ª   ª   ª   .eslintrc
+    ª   ª   ª   .nycrc
+    ª   ª   ª   CHANGELOG.md
+    ª   ª   ª   get.d.ts
+    ª   ª   ª   get.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   set.d.ts
+    ª   ª   ª   set.js
+    ª   ª   ª   tsconfig.json
+    ª   ª   ª   
+    ª   ª   +---.github
+    ª   ª   ª       FUNDING.yml
+    ª   ª   ª       
+    ª   ª   +---test
+    ª   ª           get.js
+    ª   ª           index.js
+    ª   ª           set.js
+    ª   ª           
+    ª   +---ee-first
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       
+    ª   +---encodeurl
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       
+    ª   +---es-define-property
+    ª   ª   ª   .eslintrc
+    ª   ª   ª   .nycrc
+    ª   ª   ª   CHANGELOG.md
+    ª   ª   ª   index.d.ts
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   tsconfig.json
+    ª   ª   ª   
+    ª   ª   +---.github
+    ª   ª   ª       FUNDING.yml
+    ª   ª   ª       
+    ª   ª   +---test
+    ª   ª           index.js
+    ª   ª           
+    ª   +---es-errors
+    ª   ª   ª   .eslintrc
+    ª   ª   ª   CHANGELOG.md
+    ª   ª   ª   eval.d.ts
+    ª   ª   ª   eval.js
+    ª   ª   ª   index.d.ts
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   range.d.ts
+    ª   ª   ª   range.js
+    ª   ª   ª   README.md
+    ª   ª   ª   ref.d.ts
+    ª   ª   ª   ref.js
+    ª   ª   ª   syntax.d.ts
+    ª   ª   ª   syntax.js
+    ª   ª   ª   tsconfig.json
+    ª   ª   ª   type.d.ts
+    ª   ª   ª   type.js
+    ª   ª   ª   uri.d.ts
+    ª   ª   ª   uri.js
+    ª   ª   ª   
+    ª   ª   +---.github
+    ª   ª   ª       FUNDING.yml
+    ª   ª   ª       
+    ª   ª   +---test
+    ª   ª           index.js
+    ª   ª           
+    ª   +---es-object-atoms
+    ª   ª   ª   .eslintrc
+    ª   ª   ª   CHANGELOG.md
+    ª   ª   ª   index.d.ts
+    ª   ª   ª   index.js
+    ª   ª   ª   isObject.d.ts
+    ª   ª   ª   isObject.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   RequireObjectCoercible.d.ts
+    ª   ª   ª   RequireObjectCoercible.js
+    ª   ª   ª   ToObject.d.ts
+    ª   ª   ª   ToObject.js
+    ª   ª   ª   tsconfig.json
+    ª   ª   ª   
+    ª   ª   +---.github
+    ª   ª   ª       FUNDING.yml
+    ª   ª   ª       
+    ª   ª   +---test
+    ª   ª           index.js
+    ª   ª           
+    ª   +---escape-html
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       Readme.md
+    ª   ª       
+    ª   +---etag
+    ª   ª       HISTORY.md
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       
+    ª   +---express
+    ª   ª   ª   History.md
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   Readme.md
+    ª   ª   ª   
+    ª   ª   +---lib
+    ª   ª           application.js
+    ª   ª           express.js
+    ª   ª           request.js
+    ª   ª           response.js
+    ª   ª           utils.js
+    ª   ª           view.js
+    ª   ª           
+    ª   +---finalhandler
+    ª   ª       HISTORY.md
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       
+    ª   +---forwarded
+    ª   ª       HISTORY.md
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       
+    ª   +---fresh
+    ª   ª       HISTORY.md
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       
+    ª   +---function-bind
+    ª   ª   ª   .eslintrc
+    ª   ª   ª   .nycrc
+    ª   ª   ª   CHANGELOG.md
+    ª   ª   ª   implementation.js
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   
+    ª   ª   +---.github
+    ª   ª   ª       FUNDING.yml
+    ª   ª   ª       SECURITY.md
+    ª   ª   ª       
+    ª   ª   +---test
+    ª   ª           .eslintrc
+    ª   ª           index.js
+    ª   ª           
+    ª   +---get-intrinsic
+    ª   ª   ª   .eslintrc
+    ª   ª   ª   .nycrc
+    ª   ª   ª   CHANGELOG.md
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   
+    ª   ª   +---.github
+    ª   ª   ª       FUNDING.yml
+    ª   ª   ª       
+    ª   ª   +---test
+    ª   ª           GetIntrinsic.js
+    ª   ª           
+    ª   +---get-proto
+    ª   ª   ª   .eslintrc
+    ª   ª   ª   .nycrc
+    ª   ª   ª   CHANGELOG.md
+    ª   ª   ª   index.d.ts
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   Object.getPrototypeOf.d.ts
+    ª   ª   ª   Object.getPrototypeOf.js
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   Reflect.getPrototypeOf.d.ts
+    ª   ª   ª   Reflect.getPrototypeOf.js
+    ª   ª   ª   tsconfig.json
+    ª   ª   ª   
+    ª   ª   +---.github
+    ª   ª   ª       FUNDING.yml
+    ª   ª   ª       
+    ª   ª   +---test
+    ª   ª           index.js
+    ª   ª           
+    ª   +---gopd
+    ª   ª   ª   .eslintrc
+    ª   ª   ª   CHANGELOG.md
+    ª   ª   ª   gOPD.d.ts
+    ª   ª   ª   gOPD.js
+    ª   ª   ª   index.d.ts
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   tsconfig.json
+    ª   ª   ª   
+    ª   ª   +---.github
+    ª   ª   ª       FUNDING.yml
+    ª   ª   ª       
+    ª   ª   +---test
+    ª   ª           index.js
+    ª   ª           
+    ª   +---has-symbols
+    ª   ª   ª   .eslintrc
+    ª   ª   ª   .nycrc
+    ª   ª   ª   CHANGELOG.md
+    ª   ª   ª   index.d.ts
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   shams.d.ts
+    ª   ª   ª   shams.js
+    ª   ª   ª   tsconfig.json
+    ª   ª   ª   
+    ª   ª   +---.github
+    ª   ª   ª       FUNDING.yml
+    ª   ª   ª       
+    ª   ª   +---test
+    ª   ª       ª   index.js
+    ª   ª       ª   tests.js
+    ª   ª       ª   
+    ª   ª       +---shams
+    ª   ª               core-js.js
+    ª   ª               get-own-property-symbols.js
+    ª   ª               
+    ª   +---hasown
+    ª   ª   ª   .eslintrc
+    ª   ª   ª   .nycrc
+    ª   ª   ª   CHANGELOG.md
+    ª   ª   ª   index.d.ts
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   tsconfig.json
+    ª   ª   ª   
+    ª   ª   +---.github
+    ª   ª           FUNDING.yml
+    ª   ª           
+    ª   +---http-errors
+    ª   ª   ª   HISTORY.md
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   
+    ª   ª   +---node_modules
+    ª   ª       +---statuses
+    ª   ª               codes.json
+    ª   ª               HISTORY.md
+    ª   ª               index.js
+    ª   ª               LICENSE
+    ª   ª               package.json
+    ª   ª               README.md
+    ª   ª               
+    ª   +---iconv-lite
+    ª   ª   ª   Changelog.md
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   
+    ª   ª   +---.github
+    ª   ª   ª       dependabot.yml
+    ª   ª   ª       
+    ª   ª   +---.idea
+    ª   ª   ª   ª   iconv-lite.iml
+    ª   ª   ª   ª   modules.xml
+    ª   ª   ª   ª   vcs.xml
+    ª   ª   ª   ª   
+    ª   ª   ª   +---codeStyles
+    ª   ª   ª   ª       codeStyleConfig.xml
+    ª   ª   ª   ª       Project.xml
+    ª   ª   ª   ª       
+    ª   ª   ª   +---inspectionProfiles
+    ª   ª   ª           Project_Default.xml
+    ª   ª   ª           
+    ª   ª   +---encodings
+    ª   ª   ª   ª   dbcs-codec.js
+    ª   ª   ª   ª   dbcs-data.js
+    ª   ª   ª   ª   index.js
+    ª   ª   ª   ª   internal.js
+    ª   ª   ª   ª   sbcs-codec.js
+    ª   ª   ª   ª   sbcs-data-generated.js
+    ª   ª   ª   ª   sbcs-data.js
+    ª   ª   ª   ª   utf16.js
+    ª   ª   ª   ª   utf32.js
+    ª   ª   ª   ª   utf7.js
+    ª   ª   ª   ª   
+    ª   ª   ª   +---tables
+    ª   ª   ª           big5-added.json
+    ª   ª   ª           cp936.json
+    ª   ª   ª           cp949.json
+    ª   ª   ª           cp950.json
+    ª   ª   ª           eucjp.json
+    ª   ª   ª           gb18030-ranges.json
+    ª   ª   ª           gbk-added.json
+    ª   ª   ª           shiftjis.json
+    ª   ª   ª           
+    ª   ª   +---lib
+    ª   ª           bom-handling.js
+    ª   ª           index.d.ts
+    ª   ª           index.js
+    ª   ª           streams.js
+    ª   ª           
+    ª   +---inherits
+    ª   ª       inherits.js
+    ª   ª       inherits_browser.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       
+    ª   +---ipaddr.js
+    ª   ª   ª   ipaddr.min.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   
+    ª   ª   +---lib
+    ª   ª           ipaddr.js
+    ª   ª           ipaddr.js.d.ts
+    ª   ª           
+    ª   +---is-promise
+    ª   ª       index.d.ts
+    ª   ª       index.js
+    ª   ª       index.mjs
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       readme.md
+    ª   ª       
+    ª   +---kareem
+    ª   ª       CHANGELOG.md
+    ª   ª       index.d.ts
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       SECURITY.md
+    ª   ª       
+    ª   +---math-intrinsics
+    ª   ª   ª   .eslintrc
+    ª   ª   ª   abs.d.ts
+    ª   ª   ª   abs.js
+    ª   ª   ª   CHANGELOG.md
+    ª   ª   ª   floor.d.ts
+    ª   ª   ª   floor.js
+    ª   ª   ª   isFinite.d.ts
+    ª   ª   ª   isFinite.js
+    ª   ª   ª   isInteger.d.ts
+    ª   ª   ª   isInteger.js
+    ª   ª   ª   isNaN.d.ts
+    ª   ª   ª   isNaN.js
+    ª   ª   ª   isNegativeZero.d.ts
+    ª   ª   ª   isNegativeZero.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   max.d.ts
+    ª   ª   ª   max.js
+    ª   ª   ª   min.d.ts
+    ª   ª   ª   min.js
+    ª   ª   ª   mod.d.ts
+    ª   ª   ª   mod.js
+    ª   ª   ª   package.json
+    ª   ª   ª   pow.d.ts
+    ª   ª   ª   pow.js
+    ª   ª   ª   README.md
+    ª   ª   ª   round.d.ts
+    ª   ª   ª   round.js
+    ª   ª   ª   sign.d.ts
+    ª   ª   ª   sign.js
+    ª   ª   ª   tsconfig.json
+    ª   ª   ª   
+    ª   ª   +---.github
+    ª   ª   ª       FUNDING.yml
+    ª   ª   ª       
+    ª   ª   +---constants
+    ª   ª   ª       maxArrayLength.d.ts
+    ª   ª   ª       maxArrayLength.js
+    ª   ª   ª       maxSafeInteger.d.ts
+    ª   ª   ª       maxSafeInteger.js
+    ª   ª   ª       maxValue.d.ts
+    ª   ª   ª       maxValue.js
+    ª   ª   ª       
+    ª   ª   +---test
+    ª   ª           index.js
+    ª   ª           
+    ª   +---media-typer
+    ª   ª       HISTORY.md
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       
+    ª   +---memory-pager
+    ª   ª       .travis.yml
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       test.js
+    ª   ª       
+    ª   +---merge-descriptors
+    ª   ª       index.d.ts
+    ª   ª       index.js
+    ª   ª       license
+    ª   ª       package.json
+    ª   ª       readme.md
+    ª   ª       
+    ª   +---mime-db
+    ª   ª       db.json
+    ª   ª       HISTORY.md
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       
+    ª   +---mime-types
+    ª   ª       HISTORY.md
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       mimeScore.js
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       
+    ª   +---mongodb
+    ª   ª   ª   LICENSE.md
+    ª   ª   ª   mongodb.d.ts
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   tsconfig.json
+    ª   ª   ª   
+    ª   ª   +---etc
+    ª   ª   ª       prepare.js
+    ª   ª   ª       
+    ª   ª   +---lib
+    ª   ª   ª   ª   admin.js
+    ª   ª   ª   ª   admin.js.map
+    ª   ª   ª   ª   beta.d.ts
+    ª   ª   ª   ª   beta.js
+    ª   ª   ª   ª   beta.js.map
+    ª   ª   ª   ª   bson.js
+    ª   ª   ª   ª   bson.js.map
+    ª   ª   ª   ª   change_stream.js
+    ª   ª   ª   ª   change_stream.js.map
+    ª   ª   ª   ª   collection.js
+    ª   ª   ª   ª   collection.js.map
+    ª   ª   ª   ª   connection_string.js
+    ª   ª   ª   ª   connection_string.js.map
+    ª   ª   ª   ª   constants.js
+    ª   ª   ª   ª   constants.js.map
+    ª   ª   ª   ª   db.js
+    ª   ª   ª   ª   db.js.map
+    ª   ª   ª   ª   deps.js
+    ª   ª   ª   ª   deps.js.map
+    ª   ª   ª   ª   encrypter.js
+    ª   ª   ª   ª   encrypter.js.map
+    ª   ª   ª   ª   error.js
+    ª   ª   ª   ª   error.js.map
+    ª   ª   ª   ª   explain.js
+    ª   ª   ª   ª   explain.js.map
+    ª   ª   ª   ª   index.js
+    ª   ª   ª   ª   index.js.map
+    ª   ª   ª   ª   mongo_client.js
+    ª   ª   ª   ª   mongo_client.js.map
+    ª   ª   ª   ª   mongo_client_auth_providers.js
+    ª   ª   ª   ª   mongo_client_auth_providers.js.map
+    ª   ª   ª   ª   mongo_logger.js
+    ª   ª   ª   ª   mongo_logger.js.map
+    ª   ª   ª   ª   mongo_types.js
+    ª   ª   ª   ª   mongo_types.js.map
+    ª   ª   ª   ª   read_concern.js
+    ª   ª   ª   ª   read_concern.js.map
+    ª   ª   ª   ª   read_preference.js
+    ª   ª   ª   ª   read_preference.js.map
+    ª   ª   ª   ª   resource_management.js
+    ª   ª   ª   ª   resource_management.js.map
+    ª   ª   ª   ª   sessions.js
+    ª   ª   ª   ª   sessions.js.map
+    ª   ª   ª   ª   sort.js
+    ª   ª   ª   ª   sort.js.map
+    ª   ª   ª   ª   timeout.js
+    ª   ª   ª   ª   timeout.js.map
+    ª   ª   ª   ª   transactions.js
+    ª   ª   ª   ª   transactions.js.map
+    ª   ª   ª   ª   utils.js
+    ª   ª   ª   ª   utils.js.map
+    ª   ª   ª   ª   write_concern.js
+    ª   ª   ª   ª   write_concern.js.map
+    ª   ª   ª   ª   
+    ª   ª   ª   +---bulk
+    ª   ª   ª   ª       common.js
+    ª   ª   ª   ª       common.js.map
+    ª   ª   ª   ª       ordered.js
+    ª   ª   ª   ª       ordered.js.map
+    ª   ª   ª   ª       unordered.js
+    ª   ª   ª   ª       unordered.js.map
+    ª   ª   ª   ª       
+    ª   ª   ª   +---client-side-encryption
+    ª   ª   ª   ª   ª   auto_encrypter.js
+    ª   ª   ª   ª   ª   auto_encrypter.js.map
+    ª   ª   ª   ª   ª   client_encryption.js
+    ª   ª   ª   ª   ª   client_encryption.js.map
+    ª   ª   ª   ª   ª   crypto_callbacks.js
+    ª   ª   ª   ª   ª   crypto_callbacks.js.map
+    ª   ª   ª   ª   ª   errors.js
+    ª   ª   ª   ª   ª   errors.js.map
+    ª   ª   ª   ª   ª   mongocryptd_manager.js
+    ª   ª   ª   ª   ª   mongocryptd_manager.js.map
+    ª   ª   ª   ª   ª   state_machine.js
+    ª   ª   ª   ª   ª   state_machine.js.map
+    ª   ª   ª   ª   ª   
+    ª   ª   ª   ª   +---providers
+    ª   ª   ª   ª           aws.js
+    ª   ª   ª   ª           aws.js.map
+    ª   ª   ª   ª           azure.js
+    ª   ª   ª   ª           azure.js.map
+    ª   ª   ª   ª           gcp.js
+    ª   ª   ª   ª           gcp.js.map
+    ª   ª   ª   ª           index.js
+    ª   ª   ª   ª           index.js.map
+    ª   ª   ª   ª           
+    ª   ª   ª   +---cmap
+    ª   ª   ª   ª   ª   commands.js
+    ª   ª   ª   ª   ª   commands.js.map
+    ª   ª   ª   ª   ª   command_monitoring_events.js
+    ª   ª   ª   ª   ª   command_monitoring_events.js.map
+    ª   ª   ª   ª   ª   connect.js
+    ª   ª   ª   ª   ª   connect.js.map
+    ª   ª   ª   ª   ª   connection.js
+    ª   ª   ª   ª   ª   connection.js.map
+    ª   ª   ª   ª   ª   connection_pool.js
+    ª   ª   ª   ª   ª   connection_pool.js.map
+    ª   ª   ª   ª   ª   connection_pool_events.js
+    ª   ª   ª   ª   ª   connection_pool_events.js.map
+    ª   ª   ª   ª   ª   errors.js
+    ª   ª   ª   ª   ª   errors.js.map
+    ª   ª   ª   ª   ª   metrics.js
+    ª   ª   ª   ª   ª   metrics.js.map
+    ª   ª   ª   ª   ª   stream_description.js
+    ª   ª   ª   ª   ª   stream_description.js.map
+    ª   ª   ª   ª   ª   
+    ª   ª   ª   ª   +---auth
+    ª   ª   ª   ª   ª   ª   auth_provider.js
+    ª   ª   ª   ª   ª   ª   auth_provider.js.map
+    ª   ª   ª   ª   ª   ª   aws_temporary_credentials.js
+    ª   ª   ª   ª   ª   ª   aws_temporary_credentials.js.map
+    ª   ª   ª   ª   ª   ª   gssapi.js
+    ª   ª   ª   ª   ª   ª   gssapi.js.map
+    ª   ª   ª   ª   ª   ª   mongodb_aws.js
+    ª   ª   ª   ª   ª   ª   mongodb_aws.js.map
+    ª   ª   ª   ª   ª   ª   mongodb_oidc.js
+    ª   ª   ª   ª   ª   ª   mongodb_oidc.js.map
+    ª   ª   ª   ª   ª   ª   mongo_credentials.js
+    ª   ª   ª   ª   ª   ª   mongo_credentials.js.map
+    ª   ª   ª   ª   ª   ª   plain.js
+    ª   ª   ª   ª   ª   ª   plain.js.map
+    ª   ª   ª   ª   ª   ª   providers.js
+    ª   ª   ª   ª   ª   ª   providers.js.map
+    ª   ª   ª   ª   ª   ª   scram.js
+    ª   ª   ª   ª   ª   ª   scram.js.map
+    ª   ª   ª   ª   ª   ª   x509.js
+    ª   ª   ª   ª   ª   ª   x509.js.map
+    ª   ª   ª   ª   ª   ª   
+    ª   ª   ª   ª   ª   +---mongodb_oidc
+    ª   ª   ª   ª   ª           automated_callback_workflow.js
+    ª   ª   ª   ª   ª           automated_callback_workflow.js.map
+    ª   ª   ª   ª   ª           azure_machine_workflow.js
+    ª   ª   ª   ª   ª           azure_machine_workflow.js.map
+    ª   ª   ª   ª   ª           callback_workflow.js
+    ª   ª   ª   ª   ª           callback_workflow.js.map
+    ª   ª   ª   ª   ª           command_builders.js
+    ª   ª   ª   ª   ª           command_builders.js.map
+    ª   ª   ª   ª   ª           gcp_machine_workflow.js
+    ª   ª   ª   ª   ª           gcp_machine_workflow.js.map
+    ª   ª   ª   ª   ª           human_callback_workflow.js
+    ª   ª   ª   ª   ª           human_callback_workflow.js.map
+    ª   ª   ª   ª   ª           k8s_machine_workflow.js
+    ª   ª   ª   ª   ª           k8s_machine_workflow.js.map
+    ª   ª   ª   ª   ª           token_cache.js
+    ª   ª   ª   ª   ª           token_cache.js.map
+    ª   ª   ª   ª   ª           token_machine_workflow.js
+    ª   ª   ª   ª   ª           token_machine_workflow.js.map
+    ª   ª   ª   ª   ª           
+    ª   ª   ª   ª   +---handshake
+    ª   ª   ª   ª   ª       client_metadata.js
+    ª   ª   ª   ª   ª       client_metadata.js.map
+    ª   ª   ª   ª   ª       
+    ª   ª   ª   ª   +---wire_protocol
+    ª   ª   ª   ª       ª   compression.js
+    ª   ª   ª   ª       ª   compression.js.map
+    ª   ª   ª   ª       ª   constants.js
+    ª   ª   ª   ª       ª   constants.js.map
+    ª   ª   ª   ª       ª   on_data.js
+    ª   ª   ª   ª       ª   on_data.js.map
+    ª   ª   ª   ª       ª   responses.js
+    ª   ª   ª   ª       ª   responses.js.map
+    ª   ª   ª   ª       ª   shared.js
+    ª   ª   ª   ª       ª   shared.js.map
+    ª   ª   ª   ª       ª   
+    ª   ª   ª   ª       +---on_demand
+    ª   ª   ª   ª               document.js
+    ª   ª   ª   ª               document.js.map
+    ª   ª   ª   ª               
+    ª   ª   ª   +---cursor
+    ª   ª   ª   ª       abstract_cursor.js
+    ª   ª   ª   ª       abstract_cursor.js.map
+    ª   ª   ª   ª       aggregation_cursor.js
+    ª   ª   ª   ª       aggregation_cursor.js.map
+    ª   ª   ª   ª       change_stream_cursor.js
+    ª   ª   ª   ª       change_stream_cursor.js.map
+    ª   ª   ª   ª       client_bulk_write_cursor.js
+    ª   ª   ª   ª       client_bulk_write_cursor.js.map
+    ª   ª   ª   ª       explainable_cursor.js
+    ª   ª   ª   ª       explainable_cursor.js.map
+    ª   ª   ª   ª       find_cursor.js
+    ª   ª   ª   ª       find_cursor.js.map
+    ª   ª   ª   ª       list_collections_cursor.js
+    ª   ª   ª   ª       list_collections_cursor.js.map
+    ª   ª   ª   ª       list_indexes_cursor.js
+    ª   ª   ª   ª       list_indexes_cursor.js.map
+    ª   ª   ª   ª       list_search_indexes_cursor.js
+    ª   ª   ª   ª       list_search_indexes_cursor.js.map
+    ª   ª   ª   ª       run_command_cursor.js
+    ª   ª   ª   ª       run_command_cursor.js.map
+    ª   ª   ª   ª       
+    ª   ª   ª   +---gridfs
+    ª   ª   ª   ª       download.js
+    ª   ª   ª   ª       download.js.map
+    ª   ª   ª   ª       index.js
+    ª   ª   ª   ª       index.js.map
+    ª   ª   ª   ª       upload.js
+    ª   ª   ª   ª       upload.js.map
+    ª   ª   ª   ª       
+    ª   ª   ª   +---operations
+    ª   ª   ª   ª   ª   aggregate.js
+    ª   ª   ª   ª   ª   aggregate.js.map
+    ª   ª   ª   ª   ª   command.js
+    ª   ª   ª   ª   ª   command.js.map
+    ª   ª   ª   ª   ª   count.js
+    ª   ª   ª   ª   ª   count.js.map
+    ª   ª   ª   ª   ª   create_collection.js
+    ª   ª   ª   ª   ª   create_collection.js.map
+    ª   ª   ª   ª   ª   delete.js
+    ª   ª   ª   ª   ª   delete.js.map
+    ª   ª   ª   ª   ª   distinct.js
+    ª   ª   ª   ª   ª   distinct.js.map
+    ª   ª   ª   ª   ª   drop.js
+    ª   ª   ª   ª   ª   drop.js.map
+    ª   ª   ª   ª   ª   estimated_document_count.js
+    ª   ª   ª   ª   ª   estimated_document_count.js.map
+    ª   ª   ª   ª   ª   execute_operation.js
+    ª   ª   ª   ª   ª   execute_operation.js.map
+    ª   ª   ª   ª   ª   find.js
+    ª   ª   ª   ª   ª   find.js.map
+    ª   ª   ª   ª   ª   find_and_modify.js
+    ª   ª   ª   ª   ª   find_and_modify.js.map
+    ª   ª   ª   ª   ª   get_more.js
+    ª   ª   ª   ª   ª   get_more.js.map
+    ª   ª   ª   ª   ª   indexes.js
+    ª   ª   ª   ª   ª   indexes.js.map
+    ª   ª   ª   ª   ª   insert.js
+    ª   ª   ª   ª   ª   insert.js.map
+    ª   ª   ª   ª   ª   kill_cursors.js
+    ª   ª   ª   ª   ª   kill_cursors.js.map
+    ª   ª   ª   ª   ª   list_collections.js
+    ª   ª   ª   ª   ª   list_collections.js.map
+    ª   ª   ª   ª   ª   list_databases.js
+    ª   ª   ª   ª   ª   list_databases.js.map
+    ª   ª   ª   ª   ª   operation.js
+    ª   ª   ª   ª   ª   operation.js.map
+    ª   ª   ª   ª   ª   profiling_level.js
+    ª   ª   ª   ª   ª   profiling_level.js.map
+    ª   ª   ª   ª   ª   remove_user.js
+    ª   ª   ª   ª   ª   remove_user.js.map
+    ª   ª   ª   ª   ª   rename.js
+    ª   ª   ª   ª   ª   rename.js.map
+    ª   ª   ª   ª   ª   run_command.js
+    ª   ª   ª   ª   ª   run_command.js.map
+    ª   ª   ª   ª   ª   set_profiling_level.js
+    ª   ª   ª   ª   ª   set_profiling_level.js.map
+    ª   ª   ª   ª   ª   stats.js
+    ª   ª   ª   ª   ª   stats.js.map
+    ª   ª   ª   ª   ª   update.js
+    ª   ª   ª   ª   ª   update.js.map
+    ª   ª   ª   ª   ª   validate_collection.js
+    ª   ª   ª   ª   ª   validate_collection.js.map
+    ª   ª   ª   ª   ª   
+    ª   ª   ª   ª   +---client_bulk_write
+    ª   ª   ª   ª   ª       client_bulk_write.js
+    ª   ª   ª   ª   ª       client_bulk_write.js.map
+    ª   ª   ª   ª   ª       command_builder.js
+    ª   ª   ª   ª   ª       command_builder.js.map
+    ª   ª   ª   ª   ª       common.js
+    ª   ª   ª   ª   ª       common.js.map
+    ª   ª   ª   ª   ª       executor.js
+    ª   ª   ª   ª   ª       executor.js.map
+    ª   ª   ª   ª   ª       results_merger.js
+    ª   ª   ª   ª   ª       results_merger.js.map
+    ª   ª   ª   ª   ª       
+    ª   ª   ª   ª   +---search_indexes
+    ª   ª   ª   ª           create.js
+    ª   ª   ª   ª           create.js.map
+    ª   ª   ª   ª           drop.js
+    ª   ª   ª   ª           drop.js.map
+    ª   ª   ª   ª           update.js
+    ª   ª   ª   ª           update.js.map
+    ª   ª   ª   ª           
+    ª   ª   ª   +---sdam
+    ª   ª   ª           common.js
+    ª   ª   ª           common.js.map
+    ª   ª   ª           events.js
+    ª   ª   ª           events.js.map
+    ª   ª   ª           monitor.js
+    ª   ª   ª           monitor.js.map
+    ª   ª   ª           server.js
+    ª   ª   ª           server.js.map
+    ª   ª   ª           server_description.js
+    ª   ª   ª           server_description.js.map
+    ª   ª   ª           server_selection.js
+    ª   ª   ª           server_selection.js.map
+    ª   ª   ª           server_selection_events.js
+    ª   ª   ª           server_selection_events.js.map
+    ª   ª   ª           srv_polling.js
+    ª   ª   ª           srv_polling.js.map
+    ª   ª   ª           topology.js
+    ª   ª   ª           topology.js.map
+    ª   ª   ª           topology_description.js
+    ª   ª   ª           topology_description.js.map
+    ª   ª   ª           
+    ª   ª   +---src
+    ª   ª       ª   admin.ts
+    ª   ª       ª   beta.ts
+    ª   ª       ª   bson.ts
+    ª   ª       ª   change_stream.ts
+    ª   ª       ª   collection.ts
+    ª   ª       ª   connection_string.ts
+    ª   ª       ª   constants.ts
+    ª   ª       ª   db.ts
+    ª   ª       ª   deps.ts
+    ª   ª       ª   encrypter.ts
+    ª   ª       ª   error.ts
+    ª   ª       ª   explain.ts
+    ª   ª       ª   index.ts
+    ª   ª       ª   mongo_client.ts
+    ª   ª       ª   mongo_client_auth_providers.ts
+    ª   ª       ª   mongo_logger.ts
+    ª   ª       ª   mongo_types.ts
+    ª   ª       ª   read_concern.ts
+    ª   ª       ª   read_preference.ts
+    ª   ª       ª   resource_management.ts
+    ª   ª       ª   sessions.ts
+    ª   ª       ª   sort.ts
+    ª   ª       ª   timeout.ts
+    ª   ª       ª   transactions.ts
+    ª   ª       ª   utils.ts
+    ª   ª       ª   write_concern.ts
+    ª   ª       ª   
+    ª   ª       +---bulk
+    ª   ª       ª       common.ts
+    ª   ª       ª       ordered.ts
+    ª   ª       ª       unordered.ts
+    ª   ª       ª       
+    ª   ª       +---client-side-encryption
+    ª   ª       ª   ª   auto_encrypter.ts
+    ª   ª       ª   ª   client_encryption.ts
+    ª   ª       ª   ª   crypto_callbacks.ts
+    ª   ª       ª   ª   errors.ts
+    ª   ª       ª   ª   mongocryptd_manager.ts
+    ª   ª       ª   ª   state_machine.ts
+    ª   ª       ª   ª   
+    ª   ª       ª   +---providers
+    ª   ª       ª           aws.ts
+    ª   ª       ª           azure.ts
+    ª   ª       ª           gcp.ts
+    ª   ª       ª           index.ts
+    ª   ª       ª           
+    ª   ª       +---cmap
+    ª   ª       ª   ª   commands.ts
+    ª   ª       ª   ª   command_monitoring_events.ts
+    ª   ª       ª   ª   connect.ts
+    ª   ª       ª   ª   connection.ts
+    ª   ª       ª   ª   connection_pool.ts
+    ª   ª       ª   ª   connection_pool_events.ts
+    ª   ª       ª   ª   errors.ts
+    ª   ª       ª   ª   metrics.ts
+    ª   ª       ª   ª   stream_description.ts
+    ª   ª       ª   ª   
+    ª   ª       ª   +---auth
+    ª   ª       ª   ª   ª   auth_provider.ts
+    ª   ª       ª   ª   ª   aws_temporary_credentials.ts
+    ª   ª       ª   ª   ª   gssapi.ts
+    ª   ª       ª   ª   ª   mongodb_aws.ts
+    ª   ª       ª   ª   ª   mongodb_oidc.ts
+    ª   ª       ª   ª   ª   mongo_credentials.ts
+    ª   ª       ª   ª   ª   plain.ts
+    ª   ª       ª   ª   ª   providers.ts
+    ª   ª       ª   ª   ª   scram.ts
+    ª   ª       ª   ª   ª   x509.ts
+    ª   ª       ª   ª   ª   
+    ª   ª       ª   ª   +---mongodb_oidc
+    ª   ª       ª   ª           automated_callback_workflow.ts
+    ª   ª       ª   ª           azure_machine_workflow.ts
+    ª   ª       ª   ª           callback_workflow.ts
+    ª   ª       ª   ª           command_builders.ts
+    ª   ª       ª   ª           gcp_machine_workflow.ts
+    ª   ª       ª   ª           human_callback_workflow.ts
+    ª   ª       ª   ª           k8s_machine_workflow.ts
+    ª   ª       ª   ª           token_cache.ts
+    ª   ª       ª   ª           token_machine_workflow.ts
+    ª   ª       ª   ª           
+    ª   ª       ª   +---handshake
+    ª   ª       ª   ª       client_metadata.ts
+    ª   ª       ª   ª       
+    ª   ª       ª   +---wire_protocol
+    ª   ª       ª       ª   compression.ts
+    ª   ª       ª       ª   constants.ts
+    ª   ª       ª       ª   on_data.ts
+    ª   ª       ª       ª   responses.ts
+    ª   ª       ª       ª   shared.ts
+    ª   ª       ª       ª   
+    ª   ª       ª       +---on_demand
+    ª   ª       ª               document.ts
+    ª   ª       ª               
+    ª   ª       +---cursor
+    ª   ª       ª       abstract_cursor.ts
+    ª   ª       ª       aggregation_cursor.ts
+    ª   ª       ª       change_stream_cursor.ts
+    ª   ª       ª       client_bulk_write_cursor.ts
+    ª   ª       ª       explainable_cursor.ts
+    ª   ª       ª       find_cursor.ts
+    ª   ª       ª       list_collections_cursor.ts
+    ª   ª       ª       list_indexes_cursor.ts
+    ª   ª       ª       list_search_indexes_cursor.ts
+    ª   ª       ª       run_command_cursor.ts
+    ª   ª       ª       
+    ª   ª       +---gridfs
+    ª   ª       ª       download.ts
+    ª   ª       ª       index.ts
+    ª   ª       ª       upload.ts
+    ª   ª       ª       
+    ª   ª       +---operations
+    ª   ª       ª   ª   aggregate.ts
+    ª   ª       ª   ª   command.ts
+    ª   ª       ª   ª   count.ts
+    ª   ª       ª   ª   create_collection.ts
+    ª   ª       ª   ª   delete.ts
+    ª   ª       ª   ª   distinct.ts
+    ª   ª       ª   ª   drop.ts
+    ª   ª       ª   ª   estimated_document_count.ts
+    ª   ª       ª   ª   execute_operation.ts
+    ª   ª       ª   ª   find.ts
+    ª   ª       ª   ª   find_and_modify.ts
+    ª   ª       ª   ª   get_more.ts
+    ª   ª       ª   ª   indexes.ts
+    ª   ª       ª   ª   insert.ts
+    ª   ª       ª   ª   kill_cursors.ts
+    ª   ª       ª   ª   list_collections.ts
+    ª   ª       ª   ª   list_databases.ts
+    ª   ª       ª   ª   operation.ts
+    ª   ª       ª   ª   profiling_level.ts
+    ª   ª       ª   ª   remove_user.ts
+    ª   ª       ª   ª   rename.ts
+    ª   ª       ª   ª   run_command.ts
+    ª   ª       ª   ª   set_profiling_level.ts
+    ª   ª       ª   ª   stats.ts
+    ª   ª       ª   ª   update.ts
+    ª   ª       ª   ª   validate_collection.ts
+    ª   ª       ª   ª   
+    ª   ª       ª   +---client_bulk_write
+    ª   ª       ª   ª       client_bulk_write.ts
+    ª   ª       ª   ª       command_builder.ts
+    ª   ª       ª   ª       common.ts
+    ª   ª       ª   ª       executor.ts
+    ª   ª       ª   ª       results_merger.ts
+    ª   ª       ª   ª       
+    ª   ª       ª   +---search_indexes
+    ª   ª       ª           create.ts
+    ª   ª       ª           drop.ts
+    ª   ª       ª           update.ts
+    ª   ª       ª           
+    ª   ª       +---sdam
+    ª   ª               common.ts
+    ª   ª               events.ts
+    ª   ª               monitor.ts
+    ª   ª               server.ts
+    ª   ª               server_description.ts
+    ª   ª               server_selection.ts
+    ª   ª               server_selection_events.ts
+    ª   ª               srv_polling.ts
+    ª   ª               topology.ts
+    ª   ª               topology_description.ts
+    ª   ª               
+    ª   +---mongodb-connection-string-url
+    ª   ª   ª   .esm-wrapper.mjs
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   
+    ª   ª   +---lib
+    ª   ª           index.d.ts
+    ª   ª           index.js
+    ª   ª           index.js.map
+    ª   ª           redact.d.ts
+    ª   ª           redact.js
+    ª   ª           redact.js.map
+    ª   ª           
+    ª   +---mongoose
+    ª   ª   ª   browser.js
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE.md
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   SECURITY.md
+    ª   ª   ª   
+    ª   ª   +---dist
+    ª   ª   ª       browser.umd.js
+    ª   ª   ª       
+    ª   ª   +---lib
+    ª   ª   ª   ª   aggregate.js
+    ª   ª   ª   ª   browser.js
+    ª   ª   ª   ª   browserDocument.js
+    ª   ª   ª   ª   cast.js
+    ª   ª   ª   ª   collection.js
+    ª   ª   ª   ª   connection.js
+    ª   ª   ª   ª   connectionState.js
+    ª   ª   ª   ª   constants.js
+    ª   ª   ª   ª   document.js
+    ª   ª   ª   ª   documentProvider.js
+    ª   ª   ª   ª   driver.js
+    ª   ª   ª   ª   index.js
+    ª   ª   ª   ª   internal.js
+    ª   ª   ª   ª   model.js
+    ª   ª   ª   ª   modifiedPathsSnapshot.js
+    ª   ª   ª   ª   mongoose.js
+    ª   ª   ª   ª   options.js
+    ª   ª   ª   ª   query.js
+    ª   ª   ª   ª   queryHelpers.js
+    ª   ª   ª   ª   schema.js
+    ª   ª   ª   ª   schemaType.js
+    ª   ª   ª   ª   stateMachine.js
+    ª   ª   ª   ª   utils.js
+    ª   ª   ª   ª   validOptions.js
+    ª   ª   ª   ª   virtualType.js
+    ª   ª   ª   ª   
+    ª   ª   ª   +---cast
+    ª   ª   ª   ª       bigint.js
+    ª   ª   ª   ª       boolean.js
+    ª   ª   ª   ª       date.js
+    ª   ª   ª   ª       decimal128.js
+    ª   ª   ª   ª       double.js
+    ª   ª   ª   ª       int32.js
+    ª   ª   ª   ª       number.js
+    ª   ª   ª   ª       objectid.js
+    ª   ª   ª   ª       string.js
+    ª   ª   ª   ª       uuid.js
+    ª   ª   ª   ª       
+    ª   ª   ª   +---cursor
+    ª   ª   ª   ª       aggregationCursor.js
+    ª   ª   ª   ª       changeStream.js
+    ª   ª   ª   ª       queryCursor.js
+    ª   ª   ª   ª       
+    ª   ª   ª   +---drivers
+    ª   ª   ª   ª   ª   SPEC.md
+    ª   ª   ª   ª   ª   
+    ª   ª   ª   ª   +---browser
+    ª   ª   ª   ª   ª       binary.js
+    ª   ª   ª   ª   ª       decimal128.js
+    ª   ª   ª   ª   ª       index.js
+    ª   ª   ª   ª   ª       objectid.js
+    ª   ª   ª   ª   ª       
+    ª   ª   ª   ª   +---node-mongodb-native
+    ª   ª   ª   ª           bulkWriteResult.js
+    ª   ª   ª   ª           collection.js
+    ª   ª   ª   ª           connection.js
+    ª   ª   ª   ª           index.js
+    ª   ª   ª   ª           
+    ª   ª   ª   +---error
+    ª   ª   ª   ª       browserMissingSchema.js
+    ª   ª   ª   ª       bulkSaveIncompleteError.js
+    ª   ª   ª   ª       bulkWriteError.js
+    ª   ª   ª   ª       cast.js
+    ª   ª   ª   ª       createCollectionsError.js
+    ª   ª   ª   ª       divergentArray.js
+    ª   ª   ª   ª       eachAsyncMultiError.js
+    ª   ª   ª   ª       index.js
+    ª   ª   ª   ª       invalidSchemaOption.js
+    ª   ª   ª   ª       messages.js
+    ª   ª   ª   ª       missingSchema.js
+    ª   ª   ª   ª       mongooseError.js
+    ª   ª   ª   ª       notFound.js
+    ª   ª   ª   ª       objectExpected.js
+    ª   ª   ª   ª       objectParameter.js
+    ª   ª   ª   ª       overwriteModel.js
+    ª   ª   ª   ª       parallelSave.js
+    ª   ª   ª   ª       parallelValidate.js
+    ª   ª   ª   ª       serverSelection.js
+    ª   ª   ª   ª       setOptionError.js
+    ª   ª   ª   ª       strict.js
+    ª   ª   ª   ª       strictPopulate.js
+    ª   ª   ª   ª       syncIndexes.js
+    ª   ª   ª   ª       validation.js
+    ª   ª   ª   ª       validator.js
+    ª   ª   ª   ª       version.js
+    ª   ª   ª   ª       
+    ª   ª   ª   +---helpers
+    ª   ª   ª   ª   ª   arrayDepth.js
+    ª   ª   ª   ª   ª   clone.js
+    ª   ª   ª   ª   ª   common.js
+    ª   ª   ª   ª   ª   createJSONSchemaTypeDefinition.js
+    ª   ª   ª   ª   ª   each.js
+    ª   ª   ª   ª   ª   firstKey.js
+    ª   ª   ª   ª   ª   get.js
+    ª   ª   ª   ª   ª   getConstructorName.js
+    ª   ª   ª   ª   ª   getDefaultBulkwriteResult.js
+    ª   ª   ª   ª   ª   getFunctionName.js
+    ª   ª   ª   ª   ª   immediate.js
+    ª   ª   ª   ª   ª   isAsyncFunction.js
+    ª   ª   ª   ª   ª   isBsonType.js
+    ª   ª   ª   ª   ª   isMongooseObject.js
+    ª   ª   ª   ª   ª   isObject.js
+    ª   ª   ª   ª   ª   isPOJO.js
+    ª   ª   ª   ª   ª   isPromise.js
+    ª   ª   ª   ª   ª   isSimpleValidator.js
+    ª   ª   ª   ª   ª   minimize.js
+    ª   ª   ª   ª   ª   omitUndefined.js
+    ª   ª   ª   ª   ª   once.js
+    ª   ª   ª   ª   ª   parallelLimit.js
+    ª   ª   ª   ª   ª   pluralize.js
+    ª   ª   ª   ª   ª   printJestWarning.js
+    ª   ª   ª   ª   ª   processConnectionOptions.js
+    ª   ª   ª   ª   ª   promiseOrCallback.js
+    ª   ª   ª   ª   ª   setDefaultsOnInsert.js
+    ª   ª   ª   ª   ª   specialProperties.js
+    ª   ª   ª   ª   ª   symbols.js
+    ª   ª   ª   ª   ª   timers.js
+    ª   ª   ª   ª   ª   updateValidators.js
+    ª   ª   ª   ª   ª   
+    ª   ª   ª   ª   +---aggregate
+    ª   ª   ª   ª   ª       prepareDiscriminatorPipeline.js
+    ª   ª   ª   ª   ª       stringifyFunctionOperators.js
+    ª   ª   ª   ª   ª       
+    ª   ª   ª   ª   +---cursor
+    ª   ª   ª   ª   ª       eachAsync.js
+    ª   ª   ª   ª   ª       
+    ª   ª   ª   ª   +---discriminator
+    ª   ª   ª   ª   ª       applyEmbeddedDiscriminators.js
+    ª   ª   ª   ª   ª       areDiscriminatorValuesEqual.js
+    ª   ª   ª   ª   ª       checkEmbeddedDiscriminatorKeyProjection.js
+    ª   ª   ª   ª   ª       getConstructor.js
+    ª   ª   ª   ª   ª       getDiscriminatorByValue.js
+    ª   ª   ª   ª   ª       getSchemaDiscriminatorByValue.js
+    ª   ª   ª   ª   ª       mergeDiscriminatorSchema.js
+    ª   ª   ª   ª   ª       
+    ª   ª   ª   ª   +---document
+    ª   ª   ª   ª   ª       applyDefaults.js
+    ª   ª   ª   ª   ª       applyTimestamps.js
+    ª   ª   ª   ª   ª       applyVirtuals.js
+    ª   ª   ª   ª   ª       cleanModifiedSubpaths.js
+    ª   ª   ª   ª   ª       compile.js
+    ª   ª   ª   ª   ª       getDeepestSubdocumentForPath.js
+    ª   ª   ª   ª   ª       getEmbeddedDiscriminatorPath.js
+    ª   ª   ª   ª   ª       handleSpreadDoc.js
+    ª   ª   ª   ª   ª       
+    ª   ª   ª   ª   +---error
+    ª   ª   ª   ª   ª       combinePathErrors.js
+    ª   ª   ª   ª   ª       
+    ª   ª   ª   ª   +---indexes
+    ª   ª   ª   ª   ª       applySchemaCollation.js
+    ª   ª   ª   ª   ª       decorateDiscriminatorIndexOptions.js
+    ª   ª   ª   ª   ª       getRelatedIndexes.js
+    ª   ª   ª   ª   ª       isDefaultIdIndex.js
+    ª   ª   ª   ª   ª       isIndexEqual.js
+    ª   ª   ª   ª   ª       isIndexSpecEqual.js
+    ª   ª   ª   ª   ª       isTextIndex.js
+    ª   ª   ª   ª   ª       isTimeseriesIndex.js
+    ª   ª   ª   ª   ª       
+    ª   ª   ª   ª   +---model
+    ª   ª   ª   ª   ª       applyDefaultsToPOJO.js
+    ª   ª   ª   ª   ª       applyHooks.js
+    ª   ª   ª   ª   ª       applyMethods.js
+    ª   ª   ª   ª   ª       applyStaticHooks.js
+    ª   ª   ª   ª   ª       applyStatics.js
+    ª   ª   ª   ª   ª       castBulkWrite.js
+    ª   ª   ª   ª   ª       decorateBulkWriteResult.js
+    ª   ª   ª   ª   ª       discriminator.js
+    ª   ª   ª   ª   ª       pushNestedArrayPaths.js
+    ª   ª   ª   ª   ª       
+    ª   ª   ª   ª   +---path
+    ª   ª   ª   ª   ª       parentPaths.js
+    ª   ª   ª   ª   ª       setDottedPath.js
+    ª   ª   ª   ª   ª       
+    ª   ª   ª   ª   +---populate
+    ª   ª   ª   ª   ª       assignRawDocsToIdStructure.js
+    ª   ª   ª   ª   ª       assignVals.js
+    ª   ª   ª   ª   ª       createPopulateQueryFilter.js
+    ª   ª   ª   ª   ª       getModelsMapForPopulate.js
+    ª   ª   ª   ª   ª       getSchemaTypes.js
+    ª   ª   ª   ª   ª       getVirtual.js
+    ª   ª   ª   ª   ª       leanPopulateMap.js
+    ª   ª   ª   ª   ª       lookupLocalFields.js
+    ª   ª   ª   ª   ª       markArraySubdocsPopulated.js
+    ª   ª   ª   ª   ª       modelNamesFromRefPath.js
+    ª   ª   ª   ª   ª       removeDeselectedForeignField.js
+    ª   ª   ª   ª   ª       setPopulatedVirtualValue.js
+    ª   ª   ª   ª   ª       skipPopulateValue.js
+    ª   ª   ª   ª   ª       validateRef.js
+    ª   ª   ª   ª   ª       
+    ª   ª   ª   ª   +---projection
+    ª   ª   ª   ª   ª       applyProjection.js
+    ª   ª   ª   ª   ª       hasIncludedChildren.js
+    ª   ª   ª   ª   ª       isDefiningProjection.js
+    ª   ª   ª   ª   ª       isExclusive.js
+    ª   ª   ª   ª   ª       isInclusive.js
+    ª   ª   ª   ª   ª       isNestedProjection.js
+    ª   ª   ª   ª   ª       isPathExcluded.js
+    ª   ª   ª   ª   ª       isPathSelectedInclusive.js
+    ª   ª   ª   ª   ª       isSubpath.js
+    ª   ª   ª   ª   ª       parseProjection.js
+    ª   ª   ª   ª   ª       
+    ª   ª   ª   ª   +---query
+    ª   ª   ª   ª   ª       applyGlobalOption.js
+    ª   ª   ª   ª   ª       cast$expr.js
+    ª   ª   ª   ª   ª       castFilterPath.js
+    ª   ª   ª   ª   ª       castUpdate.js
+    ª   ª   ª   ª   ª       getEmbeddedDiscriminatorPath.js
+    ª   ª   ª   ª   ª       handleImmutable.js
+    ª   ª   ª   ª   ª       handleReadPreferenceAliases.js
+    ª   ª   ª   ª   ª       hasDollarKeys.js
+    ª   ª   ª   ª   ª       isOperator.js
+    ª   ª   ª   ª   ª       sanitizeFilter.js
+    ª   ª   ª   ª   ª       sanitizeProjection.js
+    ª   ª   ª   ª   ª       selectPopulatedFields.js
+    ª   ª   ª   ª   ª       trusted.js
+    ª   ª   ª   ª   ª       validOps.js
+    ª   ª   ª   ª   ª       
+    ª   ª   ª   ª   +---schema
+    ª   ª   ª   ª   ª       addAutoId.js
+    ª   ª   ª   ª   ª       applyBuiltinPlugins.js
+    ª   ª   ª   ª   ª       applyPlugins.js
+    ª   ª   ª   ª   ª       applyReadConcern.js
+    ª   ª   ª   ª   ª       applyWriteConcern.js
+    ª   ª   ª   ª   ª       cleanPositionalOperators.js
+    ª   ª   ª   ª   ª       getIndexes.js
+    ª   ª   ª   ª   ª       getKeysInSchemaOrder.js
+    ª   ª   ª   ª   ª       getPath.js
+    ª   ª   ª   ª   ª       getSubdocumentStrictValue.js
+    ª   ª   ª   ª   ª       handleIdOption.js
+    ª   ª   ª   ª   ª       handleTimestampOption.js
+    ª   ª   ª   ª   ª       idGetter.js
+    ª   ª   ª   ª   ª       merge.js
+    ª   ª   ª   ª   ª       
+    ª   ª   ª   ª   +---schematype
+    ª   ª   ª   ª   ª       handleImmutable.js
+    ª   ª   ª   ª   ª       
+    ª   ª   ª   ª   +---timestamps
+    ª   ª   ª   ª   ª       setDocumentTimestamps.js
+    ª   ª   ª   ª   ª       setupTimestamps.js
+    ª   ª   ª   ª   ª       
+    ª   ª   ª   ª   +---topology
+    ª   ª   ª   ª   ª       allServersUnknown.js
+    ª   ª   ª   ª   ª       isAtlas.js
+    ª   ª   ª   ª   ª       isSSLError.js
+    ª   ª   ª   ª   ª       
+    ª   ª   ª   ª   +---update
+    ª   ª   ª   ª           applyTimestampsToChildren.js
+    ª   ª   ª   ª           applyTimestampsToUpdate.js
+    ª   ª   ª   ª           castArrayFilters.js
+    ª   ª   ª   ª           decorateUpdateWithVersionKey.js
+    ª   ª   ª   ª           modifiedPaths.js
+    ª   ª   ª   ª           moveImmutableProperties.js
+    ª   ª   ª   ª           removeUnusedArrayFilters.js
+    ª   ª   ª   ª           updatedPathsByArrayFilter.js
+    ª   ª   ª   ª           
+    ª   ª   ª   +---options
+    ª   ª   ª   ª       populateOptions.js
+    ª   ª   ª   ª       propertyOptions.js
+    ª   ª   ª   ª       saveOptions.js
+    ª   ª   ª   ª       schemaArrayOptions.js
+    ª   ª   ª   ª       schemaBufferOptions.js
+    ª   ª   ª   ª       schemaDateOptions.js
+    ª   ª   ª   ª       schemaDocumentArrayOptions.js
+    ª   ª   ª   ª       schemaMapOptions.js
+    ª   ª   ª   ª       schemaNumberOptions.js
+    ª   ª   ª   ª       schemaObjectIdOptions.js
+    ª   ª   ª   ª       schemaStringOptions.js
+    ª   ª   ª   ª       schemaSubdocumentOptions.js
+    ª   ª   ª   ª       schemaTypeOptions.js
+    ª   ª   ª   ª       schemaUnionOptions.js
+    ª   ª   ª   ª       virtualOptions.js
+    ª   ª   ª   ª       
+    ª   ª   ª   +---plugins
+    ª   ª   ª   ª       index.js
+    ª   ª   ª   ª       saveSubdocs.js
+    ª   ª   ª   ª       sharding.js
+    ª   ª   ª   ª       trackTransaction.js
+    ª   ª   ª   ª       validateBeforeSave.js
+    ª   ª   ª   ª       
+    ª   ª   ª   +---schema
+    ª   ª   ª   ª   ª   array.js
+    ª   ª   ª   ª   ª   bigint.js
+    ª   ª   ª   ª   ª   boolean.js
+    ª   ª   ª   ª   ª   buffer.js
+    ª   ª   ª   ª   ª   date.js
+    ª   ª   ª   ª   ª   decimal128.js
+    ª   ª   ª   ª   ª   documentArray.js
+    ª   ª   ª   ª   ª   documentArrayElement.js
+    ª   ª   ª   ª   ª   double.js
+    ª   ª   ª   ª   ª   index.js
+    ª   ª   ª   ª   ª   int32.js
+    ª   ª   ª   ª   ª   map.js
+    ª   ª   ª   ª   ª   mixed.js
+    ª   ª   ª   ª   ª   number.js
+    ª   ª   ª   ª   ª   objectId.js
+    ª   ª   ª   ª   ª   string.js
+    ª   ª   ª   ª   ª   subdocument.js
+    ª   ª   ª   ª   ª   symbols.js
+    ª   ª   ª   ª   ª   union.js
+    ª   ª   ª   ª   ª   uuid.js
+    ª   ª   ª   ª   ª   
+    ª   ª   ª   ª   +---operators
+    ª   ª   ª   ª           bitwise.js
+    ª   ª   ª   ª           exists.js
+    ª   ª   ª   ª           geospatial.js
+    ª   ª   ª   ª           helpers.js
+    ª   ª   ª   ª           text.js
+    ª   ª   ª   ª           type.js
+    ª   ª   ª   ª           
+    ª   ª   ª   +---types
+    ª   ª   ª       ª   arraySubdocument.js
+    ª   ª   ª       ª   buffer.js
+    ª   ª   ª       ª   decimal128.js
+    ª   ª   ª       ª   double.js
+    ª   ª   ª       ª   index.js
+    ª   ª   ª       ª   map.js
+    ª   ª   ª       ª   objectid.js
+    ª   ª   ª       ª   subdocument.js
+    ª   ª   ª       ª   uuid.js
+    ª   ª   ª       ª   
+    ª   ª   ª       +---array
+    ª   ª   ª       ª   ª   index.js
+    ª   ª   ª       ª   ª   isMongooseArray.js
+    ª   ª   ª       ª   ª   
+    ª   ª   ª       ª   +---methods
+    ª   ª   ª       ª           index.js
+    ª   ª   ª       ª           
+    ª   ª   ª       +---documentArray
+    ª   ª   ª           ª   index.js
+    ª   ª   ª           ª   isMongooseDocumentArray.js
+    ª   ª   ª           ª   
+    ª   ª   ª           +---methods
+    ª   ª   ª                   index.js
+    ª   ª   ª                   
+    ª   ª   +---types
+    ª   ª           aggregate.d.ts
+    ª   ª           augmentations.d.ts
+    ª   ª           callback.d.ts
+    ª   ª           collection.d.ts
+    ª   ª           connection.d.ts
+    ª   ª           cursor.d.ts
+    ª   ª           document.d.ts
+    ª   ª           error.d.ts
+    ª   ª           expressions.d.ts
+    ª   ª           helpers.d.ts
+    ª   ª           index.d.ts
+    ª   ª           indexes.d.ts
+    ª   ª           inferrawdoctype.d.ts
+    ª   ª           inferschematype.d.ts
+    ª   ª           middlewares.d.ts
+    ª   ª           models.d.ts
+    ª   ª           mongooseoptions.d.ts
+    ª   ª           pipelinestage.d.ts
+    ª   ª           populate.d.ts
+    ª   ª           query.d.ts
+    ª   ª           schemaoptions.d.ts
+    ª   ª           schematypes.d.ts
+    ª   ª           session.d.ts
+    ª   ª           types.d.ts
+    ª   ª           utility.d.ts
+    ª   ª           validation.d.ts
+    ª   ª           virtuals.d.ts
+    ª   ª           
+    ª   +---mpath
+    ª   ª   ª   .travis.yml
+    ª   ª   ª   History.md
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   SECURITY.md
+    ª   ª   ª   
+    ª   ª   +---lib
+    ª   ª   ª       index.js
+    ª   ª   ª       stringToParts.js
+    ª   ª   ª       
+    ª   ª   +---test
+    ª   ª           .eslintrc.yml
+    ª   ª           index.js
+    ª   ª           stringToParts.js
+    ª   ª           
+    ª   +---mquery
+    ª   ª   ª   History.md
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   SECURITY.md
+    ª   ª   ª   
+    ª   ª   +---.github
+    ª   ª   ª       ISSUE_TEMPLATE.md
+    ª   ª   ª       PULL_REQUEST_TEMPLATE.md
+    ª   ª   ª       
+    ª   ª   +---lib
+    ª   ª       ª   env.js
+    ª   ª       ª   mquery.js
+    ª   ª       ª   permissions.js
+    ª   ª       ª   utils.js
+    ª   ª       ª   
+    ª   ª       +---collection
+    ª   ª               collection.js
+    ª   ª               index.js
+    ª   ª               node.js
+    ª   ª               
+    ª   +---ms
+    ª   ª       index.js
+    ª   ª       license.md
+    ª   ª       package.json
+    ª   ª       readme.md
+    ª   ª       
+    ª   +---negotiator
+    ª   ª   ª   HISTORY.md
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   
+    ª   ª   +---lib
+    ª   ª           charset.js
+    ª   ª           encoding.js
+    ª   ª           language.js
+    ª   ª           mediaType.js
+    ª   ª           
+    ª   +---object-assign
+    ª   ª       index.js
+    ª   ª       license
+    ª   ª       package.json
+    ª   ª       readme.md
+    ª   ª       
+    ª   +---object-inspect
+    ª   ª   ª   .eslintrc
+    ª   ª   ª   .nycrc
+    ª   ª   ª   CHANGELOG.md
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package-support.json
+    ª   ª   ª   package.json
+    ª   ª   ª   readme.markdown
+    ª   ª   ª   test-core-js.js
+    ª   ª   ª   util.inspect.js
+    ª   ª   ª   
+    ª   ª   +---.github
+    ª   ª   ª       FUNDING.yml
+    ª   ª   ª       
+    ª   ª   +---example
+    ª   ª   ª       all.js
+    ª   ª   ª       circular.js
+    ª   ª   ª       fn.js
+    ª   ª   ª       inspect.js
+    ª   ª   ª       
+    ª   ª   +---test
+    ª   ª       ª   bigint.js
+    ª   ª       ª   circular.js
+    ª   ª       ª   deep.js
+    ª   ª       ª   element.js
+    ª   ª       ª   err.js
+    ª   ª       ª   fakes.js
+    ª   ª       ª   fn.js
+    ª   ª       ª   global.js
+    ª   ª       ª   has.js
+    ª   ª       ª   holes.js
+    ª   ª       ª   indent-option.js
+    ª   ª       ª   inspect.js
+    ª   ª       ª   lowbyte.js
+    ª   ª       ª   number.js
+    ª   ª       ª   quoteStyle.js
+    ª   ª       ª   toStringTag.js
+    ª   ª       ª   undef.js
+    ª   ª       ª   values.js
+    ª   ª       ª   
+    ª   ª       +---browser
+    ª   ª               dom.js
+    ª   ª               
+    ª   +---on-finished
+    ª   ª       HISTORY.md
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       
+    ª   +---once
+    ª   ª       LICENSE
+    ª   ª       once.js
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       
+    ª   +---parseurl
+    ª   ª       HISTORY.md
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       
+    ª   +---path-to-regexp
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   Readme.md
+    ª   ª   ª   
+    ª   ª   +---dist
+    ª   ª           index.d.ts
+    ª   ª           index.js
+    ª   ª           index.js.map
+    ª   ª           
+    ª   +---proxy-addr
+    ª   ª       HISTORY.md
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       
+    ª   +---punycode
+    ª   ª       LICENSE-MIT.txt
+    ª   ª       package.json
+    ª   ª       punycode.es6.js
+    ª   ª       punycode.js
+    ª   ª       README.md
+    ª   ª       
+    ª   +---qs
+    ª   ª   ª   .editorconfig
+    ª   ª   ª   .eslintrc
+    ª   ª   ª   .nycrc
+    ª   ª   ª   CHANGELOG.md
+    ª   ª   ª   LICENSE.md
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   
+    ª   ª   +---.github
+    ª   ª   ª       FUNDING.yml
+    ª   ª   ª       
+    ª   ª   +---dist
+    ª   ª   ª       qs.js
+    ª   ª   ª       
+    ª   ª   +---lib
+    ª   ª   ª       formats.js
+    ª   ª   ª       index.js
+    ª   ª   ª       parse.js
+    ª   ª   ª       stringify.js
+    ª   ª   ª       utils.js
+    ª   ª   ª       
+    ª   ª   +---test
+    ª   ª           empty-keys-cases.js
+    ª   ª           parse.js
+    ª   ª           stringify.js
+    ª   ª           utils.js
+    ª   ª           
+    ª   +---range-parser
+    ª   ª       HISTORY.md
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       
+    ª   +---raw-body
+    ª   ª   ª   HISTORY.md
+    ª   ª   ª   index.d.ts
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   SECURITY.md
+    ª   ª   ª   
+    ª   ª   +---node_modules
+    ª   ª       +---iconv-lite
+    ª   ª           ª   Changelog.md
+    ª   ª           ª   LICENSE
+    ª   ª           ª   package.json
+    ª   ª           ª   README.md
+    ª   ª           ª   
+    ª   ª           +---encodings
+    ª   ª           ª   ª   dbcs-codec.js
+    ª   ª           ª   ª   dbcs-data.js
+    ª   ª           ª   ª   index.js
+    ª   ª           ª   ª   internal.js
+    ª   ª           ª   ª   sbcs-codec.js
+    ª   ª           ª   ª   sbcs-data-generated.js
+    ª   ª           ª   ª   sbcs-data.js
+    ª   ª           ª   ª   utf16.js
+    ª   ª           ª   ª   utf32.js
+    ª   ª           ª   ª   utf7.js
+    ª   ª           ª   ª   
+    ª   ª           ª   +---tables
+    ª   ª           ª           big5-added.json
+    ª   ª           ª           cp936.json
+    ª   ª           ª           cp949.json
+    ª   ª           ª           cp950.json
+    ª   ª           ª           eucjp.json
+    ª   ª           ª           gb18030-ranges.json
+    ª   ª           ª           gbk-added.json
+    ª   ª           ª           shiftjis.json
+    ª   ª           ª           
+    ª   ª           +---lib
+    ª   ª               ª   bom-handling.js
+    ª   ª               ª   index.d.ts
+    ª   ª               ª   index.js
+    ª   ª               ª   streams.js
+    ª   ª               ª   
+    ª   ª               +---helpers
+    ª   ª                       merge-exports.js
+    ª   ª                       
+    ª   +---router
+    ª   ª   ª   HISTORY.md
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   
+    ª   ª   +---lib
+    ª   ª           layer.js
+    ª   ª           route.js
+    ª   ª           
+    ª   +---safer-buffer
+    ª   ª       dangerous.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       Porting-Buffer.md
+    ª   ª       Readme.md
+    ª   ª       safer.js
+    ª   ª       tests.js
+    ª   ª       
+    ª   +---send
+    ª   ª       HISTORY.md
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       
+    ª   +---serve-static
+    ª   ª       HISTORY.md
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       
+    ª   +---setprototypeof
+    ª   ª   ª   index.d.ts
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   
+    ª   ª   +---test
+    ª   ª           index.js
+    ª   ª           
+    ª   +---side-channel
+    ª   ª   ª   .editorconfig
+    ª   ª   ª   .eslintrc
+    ª   ª   ª   .nycrc
+    ª   ª   ª   CHANGELOG.md
+    ª   ª   ª   index.d.ts
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   tsconfig.json
+    ª   ª   ª   
+    ª   ª   +---.github
+    ª   ª   ª       FUNDING.yml
+    ª   ª   ª       
+    ª   ª   +---test
+    ª   ª           index.js
+    ª   ª           
+    ª   +---side-channel-list
+    ª   ª   ª   .editorconfig
+    ª   ª   ª   .eslintrc
+    ª   ª   ª   .nycrc
+    ª   ª   ª   CHANGELOG.md
+    ª   ª   ª   index.d.ts
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   list.d.ts
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   tsconfig.json
+    ª   ª   ª   
+    ª   ª   +---.github
+    ª   ª   ª       FUNDING.yml
+    ª   ª   ª       
+    ª   ª   +---test
+    ª   ª           index.js
+    ª   ª           
+    ª   +---side-channel-map
+    ª   ª   ª   .editorconfig
+    ª   ª   ª   .eslintrc
+    ª   ª   ª   .nycrc
+    ª   ª   ª   CHANGELOG.md
+    ª   ª   ª   index.d.ts
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   tsconfig.json
+    ª   ª   ª   
+    ª   ª   +---.github
+    ª   ª   ª       FUNDING.yml
+    ª   ª   ª       
+    ª   ª   +---test
+    ª   ª           index.js
+    ª   ª           
+    ª   +---side-channel-weakmap
+    ª   ª   ª   .editorconfig
+    ª   ª   ª   .eslintrc
+    ª   ª   ª   .nycrc
+    ª   ª   ª   CHANGELOG.md
+    ª   ª   ª   index.d.ts
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   tsconfig.json
+    ª   ª   ª   
+    ª   ª   +---.github
+    ª   ª   ª       FUNDING.yml
+    ª   ª   ª       
+    ª   ª   +---test
+    ª   ª           index.js
+    ª   ª           
+    ª   +---sift
+    ª   ª   ª   index.d.ts
+    ª   ª   ª   index.js
+    ª   ª   ª   MIT-LICENSE.txt
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   sift.csp.min.js
+    ª   ª   ª   sift.csp.min.js.map
+    ª   ª   ª   sift.min.js
+    ª   ª   ª   sift.min.js.map
+    ª   ª   ª   
+    ª   ª   +---es
+    ª   ª   ª       index.js
+    ª   ª   ª       index.js.map
+    ª   ª   ª       
+    ª   ª   +---es5m
+    ª   ª   ª       index.js
+    ª   ª   ª       index.js.map
+    ª   ª   ª       
+    ª   ª   +---lib
+    ª   ª   ª       core.d.ts
+    ª   ª   ª       index.d.ts
+    ª   ª   ª       index.js
+    ª   ª   ª       index.js.map
+    ª   ª   ª       operations.d.ts
+    ª   ª   ª       utils.d.ts
+    ª   ª   ª       
+    ª   ª   +---src
+    ª   ª           core.ts
+    ª   ª           index.ts
+    ª   ª           operations.ts
+    ª   ª           utils.ts
+    ª   ª           
+    ª   +---sparse-bitfield
+    ª   ª       .npmignore
+    ª   ª       .travis.yml
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       test.js
+    ª   ª       
+    ª   +---statuses
+    ª   ª       codes.json
+    ª   ª       HISTORY.md
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       
+    ª   +---toidentifier
+    ª   ª       HISTORY.md
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       
+    ª   +---tr46
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE.md
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   
+    ª   ª   +---lib
+    ª   ª           mappingTable.json
+    ª   ª           regexes.js
+    ª   ª           statusMapping.js
+    ª   ª           
+    ª   +---type-is
+    ª   ª       HISTORY.md
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       
+    ª   +---unpipe
+    ª   ª       HISTORY.md
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       
+    ª   +---vary
+    ª   ª       HISTORY.md
+    ª   ª       index.js
+    ª   ª       LICENSE
+    ª   ª       package.json
+    ª   ª       README.md
+    ª   ª       
+    ª   +---webidl-conversions
+    ª   ª   ª   LICENSE.md
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   
+    ª   ª   +---lib
+    ª   ª           index.js
+    ª   ª           
+    ª   +---whatwg-url
+    ª   ª   ª   index.js
+    ª   ª   ª   LICENSE.txt
+    ª   ª   ª   package.json
+    ª   ª   ª   README.md
+    ª   ª   ª   webidl2js-wrapper.js
+    ª   ª   ª   
+    ª   ª   +---lib
+    ª   ª           encoding.js
+    ª   ª           Function.js
+    ª   ª           infra.js
+    ª   ª           percent-encoding.js
+    ª   ª           URL-impl.js
+    ª   ª           url-state-machine.js
+    ª   ª           URL.js
+    ª   ª           urlencoded.js
+    ª   ª           URLSearchParams-impl.js
+    ª   ª           URLSearchParams.js
+    ª   ª           utils.js
+    ª   ª           VoidFunction.js
+    ª   ª           
+    ª   +---wrappy
+    ª           LICENSE
+    ª           package.json
+    ª           README.md
+    ª           wrappy.js
+    ª           
+    +---public
+        ª   generate_reports.mjs
+        ª   generate_reports_lideres.mjs
+        ª   Lideres y empleados.txt
+        ª   package.json
+        ª   reporte_angel_250.html
+        ª   reporte_antonior_243.html
+        ª   reporte_antonio_120.html
+        ª   reporte_base_lideres.html
+        ª   reporte_base_operario.html
+        ª   reporte_carlos_158.html
+        ª   reporte_eloy_40.html
+        ª   reporte_franciscog_229.html
+        ª   reporte_franciscoj_251.html
+        ª   reporte_franciscoq_199.html
+        ª   reporte_franciscor_239.html
+        ª   reporte_humberto_177.html
+        ª   reporte_jonatan_178.html
+        ª   reporte_joseg_196.html
+        ª   reporte_josep_252.html
+        ª   reporte_josue_246.html
+        ª   reporte_juancarlos_204.html
+        ª   reporte_juanjose_203.html
+        ª   reporte_juanmanuel_244.html
+        ª   
+        +---css
+        ª       style.css
+        ª       
+        +---images
+        ª       logo.png
+        ª       
+        +---js
+        ª       historico.js
+        ª       index.js
+        ª       main.js
+        ª       operario.js
+        ª       turno.js
+        ª       
+        +---reportes
+                reporte_angel_250.html
+                reporte_antonior_243.html
+                reporte_antonio_120.html
+                reporte_carlos_158.html
+                reporte_eloy_40.html
+                reporte_franciscog_229.html
+                reporte_franciscoj_251.html
+                reporte_franciscoq_199.html
+                reporte_franciscor_239.html
+                reporte_humberto_177.html
+                reporte_jonatan_178.html
+                reporte_joseg_196.html
+                reporte_josep_252.html
+                reporte_josue_246.html
+                reporte_juancarlos_204.html
+                reporte_juanjose_203.html
+                reporte_juanmanuel_244.html
+                
+
